@@ -44,9 +44,9 @@ export async function addStudent(classId: string, formData: FormData) {
 
   const parsed = addStudentSchema.safeParse({
     fullName: formData.get("fullName"),
-    studentCode: formData.get("studentCode"),
-    dateOfBirth: formData.get("dateOfBirth"),
-    note: formData.get("note"),
+    studentCode: formData.get("studentCode") || undefined,
+    dateOfBirth: formData.get("dateOfBirth") || undefined,
+    note: formData.get("note") || undefined,
   });
 
   if (!parsed.success) {

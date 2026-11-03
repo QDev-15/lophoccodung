@@ -34,12 +34,20 @@ export default async function ClassDetailPage({
             <p className="mt-1 text-sm text-zinc-500">{classItem.description}</p>
           )}
         </div>
-        <Link
-          href={`/classes/${classId}/import`}
-          className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
-          Nhập từ Excel
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href={`/classes/${classId}/games`}
+            className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          >
+            🎲 Gọi tên ngẫu nhiên
+          </Link>
+          <Link
+            href={`/classes/${classId}/import`}
+            className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          >
+            Nhập từ Excel
+          </Link>
+        </div>
       </div>
 
       <section className="mt-8">

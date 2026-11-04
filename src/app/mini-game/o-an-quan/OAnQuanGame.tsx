@@ -86,6 +86,9 @@ const STONE_OFFSETS: Array<[number, number]> = [
   [17, 40], [83, 42], [50, 74], [29, 78], [71, 78], [50, 48],
 ];
 
+// How many previously-sown cells (this sow step) still show a fading trail glow.
+const SOW_TRAIL_LENGTH = 3;
+
 export function OAnQuanGame() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [showInstructions, setShowInstructions] = useState(false);
@@ -332,6 +335,17 @@ export function OAnQuanGame() {
       ? sowSteps[Math.min(sowStepIdx - 1, sowSteps.length - 1)]?.highlight ?? null
       : null;
 
+  // Purely presentational: the last few cells sown just before the current one, so the
+  // board can render a soft fading glow trail along the path already sown this step.
+  // Derived from existing sowSteps/sowStepIdx — does not affect timing or game state.
+  const trailIndices: number[] =
+    turnPhase === "animating" && sowSteps && sowStepIdx > 1
+      ? sowSteps
+          .slice(Math.max(0, sowStepIdx - 1 - SOW_TRAIL_LENGTH), sowStepIdx - 1)
+          .map((s) => s.highlight)
+          .reverse()
+      : [];
+
   return (
     <div
       ref={wrapperRef}
@@ -367,6 +381,7 @@ export function OAnQuanGame() {
           turnPhase={turnPhase}
           selectedCell={selectedCell}
           highlightIndex={highlightIndex}
+          trailIndices={trailIndices}
           question={question}
           secondsLeft={secondsLeft}
           answerSeconds={settings.answerSeconds}
@@ -406,21 +421,28 @@ function ThatchedHut({ className = "" }: { className?: string }) {
   );
 }
 
-function VillageScene({ variant = "flat" }: { variant?: "rich" | "flat" }) {
+function VillageScene({ variant = "flat" }: { variant?: "rich" | "flat" | "play" }) {
   const rich = variant === "rich";
+  const play = variant === "play";
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           rich
             ? "from-(--color-mint-light) via-white to-(--color-sun)/15"
-            : "from-white via-(--color-mint-light)/40 to-(--color-cloud)"
+            : play
+              ? "from-(--color-mint-light)/55 via-white to-[#f3dcb0]/45"
+              : "from-white via-(--color-mint-light)/40 to-(--color-cloud)"
         }`}
       />
       <div className="absolute -top-10 right-8 size-40 rounded-full bg-(--color-sun)/35 blur-3xl" />
       <div className="absolute left-[12%] top-6 h-8 w-24 rounded-full bg-white/70 blur-md" />
       <div className="absolute right-[22%] top-4 h-6 w-20 rounded-full bg-white/60 blur-md" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-(--color-mint-light) to-transparent" />
+      <div
+        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${
+          play ? "h-2/5 from-[#e3b479]/50 via-[#f3dcb0]/20 to-transparent" : "h-1/3 from-(--color-mint-light) to-transparent"
+        }`}
+      />
       <span className="animate-leaf-sway absolute left-[4%] bottom-0 text-6xl opacity-80 sm:text-7xl">🎋</span>
       <span className="animate-leaf-sway absolute right-[5%] bottom-0 text-5xl opacity-70 sm:text-6xl" style={{ animationDelay: "1.2s" }}>
         🎋
@@ -436,7 +458,51 @@ function VillageScene({ variant = "flat" }: { variant?: "rich" | "flat" }) {
           <span className="absolute bottom-1 right-[20%] text-2xl">🌼</span>
         </>
       )}
+      {play && (
+        <>
+          {/* Big tree + hut anchor the far left/right edges of the play area, like the
+              reference gameplay scene — hidden below md where there isn't room beside
+              the board (overflow-hidden on the parent clips any bleed, so this never
+              affects layout width/scroll). */}
+          <span
+            className="absolute -bottom-3 -left-7 hidden text-[8rem] leading-none drop-shadow-[0_14px_16px_rgba(46,42,33,0.22)] md:block lg:-left-8 lg:text-[9.5rem]"
+            style={{ transformOrigin: "bottom center" }}
+          >
+            🌳
+          </span>
+          <span className="absolute bottom-16 left-[6%] hidden text-2xl md:block lg:bottom-20 lg:left-[7%]">🐔</span>
+          <span className="absolute bottom-12 left-[10%] hidden text-lg md:block lg:bottom-16 lg:left-[11%]">🐥</span>
+          <ThatchedHut className="absolute -bottom-3 -right-7 hidden h-32 w-36 drop-shadow-[0_14px_16px_rgba(46,42,33,0.22)] md:block lg:-right-8 lg:h-40 lg:w-44" />
+          <span className="absolute bottom-2 left-[3%] text-xl sm:text-2xl">🌼</span>
+          <span className="absolute bottom-2 right-[3%] text-xl sm:text-2xl">🌼</span>
+        </>
+      )}
     </div>
+  );
+}
+
+// A small round-bottomed woven basket, hand-rolled as inline SVG in the same flat,
+// outlined style as `ThatchedHut` (no illustration/raster assets in this codebase).
+// Used as a decorative companion to each team's card — echoes the "Giỏ của ĐỘI X"
+// baskets in the reference scene that visually hold each team's collected stones.
+function WovenBasket({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 44 34" className={className} role="presentation" aria-hidden="true">
+      <ellipse cx="22" cy="9" rx="17" ry="4" fill="#e9c08a" stroke="#8a5a28" strokeWidth="2" />
+      <path
+        d="M6 9 C6 9 8 28 11 30 C15 32 29 32 33 30 C36 28 38 9 38 9"
+        fill="#c88a4a"
+        stroke="#8a5a28"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M7 14 C14 16.5 30 16.5 37 14" fill="none" stroke="#8a5a28" strokeWidth="1.3" opacity="0.55" />
+      <path d="M8 20 C15 22.5 29 22.5 36 20" fill="none" stroke="#8a5a28" strokeWidth="1.3" opacity="0.55" />
+      <path d="M9.5 25.5 C16 27.5 28 27.5 34.5 25.5" fill="none" stroke="#8a5a28" strokeWidth="1.3" opacity="0.55" />
+      <circle cx="17" cy="8" r="2.6" fill="var(--color-mint)" opacity="0.9" />
+      <circle cx="23" cy="7" r="2.2" fill="var(--color-sun)" opacity="0.9" />
+      <circle cx="28" cy="8.5" r="2.4" fill="var(--color-lavender)" opacity="0.9" />
+    </svg>
   );
 }
 
@@ -843,7 +909,7 @@ function SetupScreen({
 
 function InfoChip({ supportStock }: { supportStock: number }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-(--color-ink)/70 shadow-sm">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-[#c88a4a]/30 bg-white/90 px-3 py-1.5 text-xs font-bold text-(--color-ink)/70 shadow-sm">
       <span aria-hidden="true">🎁</span> Kho hỗ trợ: {supportStock}
     </div>
   );
@@ -857,6 +923,7 @@ function PlayScreen({
   turnPhase,
   selectedCell,
   highlightIndex,
+  trailIndices,
   question,
   secondsLeft,
   answerSeconds,
@@ -875,6 +942,7 @@ function PlayScreen({
   turnPhase: TurnPhase;
   selectedCell: number | null;
   highlightIndex: number | null;
+  trailIndices: number[];
   question: MathQuestion | null;
   secondsLeft: number | null;
   answerSeconds: number | "unlimited";
@@ -890,7 +958,7 @@ function PlayScreen({
 
   return (
     <div className="relative mt-2 overflow-hidden rounded-[1.75rem] px-3 py-5 sm:rounded-[2.25rem] sm:px-5 sm:py-6">
-      <VillageScene variant="flat" />
+      <VillageScene variant="play" />
       <div className="relative z-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <InfoChip supportStock={supportStock} />
@@ -904,6 +972,7 @@ function PlayScreen({
           selectable={turnPhase === "choose-cell"}
           selectedCell={selectedCell}
           highlightIndex={highlightIndex}
+          trailIndices={trailIndices}
           onCellClick={onCellClick}
         />
 
@@ -912,8 +981,8 @@ function PlayScreen({
 
           <div className="flex-1 text-center">
             {turnPhase === "choose-cell" && (
-              <p className="animate-pop-in font-display text-base font-bold text-(--color-ink) sm:text-lg">
-                👉 {activeState.name} chọn một ô có sỏi nhé!
+              <p className="animate-pop-in inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-2 font-display text-sm font-bold text-(--color-ink) shadow-[0_4px_12px_-4px_rgba(46,42,33,0.25)] sm:text-base">
+                <span aria-hidden="true">👉</span> {activeState.name} chọn một ô có sỏi nhé!
               </p>
             )}
 
@@ -960,9 +1029,13 @@ function PlayScreen({
 function TurnBanner({ activeTeam, activeName }: { activeTeam: Team; activeName: string }) {
   const tint = TEAM_TINT[activeTeam];
   return (
+    // `key` forces a remount (and a fresh pop-in) every time the active team changes,
+    // instead of only once on first mount — makes each turn change read as an event.
     <div
+      key={activeTeam}
       className={`animate-pop-in relative rounded-full bg-gradient-to-r ${tint.gradient} px-6 py-2.5 text-center font-display text-sm font-extrabold text-white shadow-[0_6px_16px_-4px_rgba(46,42,33,0.4)] sm:text-base`}
     >
+      <span aria-hidden="true" className="mr-1">📣</span>
       ĐẾN LƯỢT {activeName}!
     </div>
   );
@@ -986,7 +1059,17 @@ function TeamCard({
         active ? `ring-[3px] ${tint.ring} animate-glow` : ""
       }`}
     >
-      <IconChip icon={teamId === "A" ? "🧒" : "👧"} tint={tint.chip} size="md" />
+      <div className="relative shrink-0">
+        <IconChip
+          icon={teamId === "A" ? "🧒" : "👧"}
+          tint={tint.chip}
+          size="lg"
+          className={`shadow-[0_4px_10px_-2px_rgba(46,42,33,0.25)] ${active ? "animate-float" : ""}`}
+        />
+        {/* Decorative basket echoing the "Giỏ của ĐỘI X" in the reference scene — the
+            readable sỏi count stays in the text stats below; this is a visual accent. */}
+        <WovenBasket className="absolute -bottom-2 -left-2 h-7 w-8 drop-shadow-sm" />
+      </div>
       <div>
         <span className={`block text-xs font-extrabold uppercase ${tint.text}`}>{team.name}</span>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-(--color-ink)/60">
@@ -1004,24 +1087,36 @@ function TeamCard({
 // Board
 // ---------------------------------------------------------------------------
 
-function StoneCluster({ cellIndex, count }: { cellIndex: number; count: number }) {
+function StoneCluster({
+  cellIndex,
+  count,
+  freshIndex = -1,
+}: {
+  cellIndex: number;
+  count: number;
+  /** Index of the bead that just landed this frame (gets a bigger drop flourish). */
+  freshIndex?: number;
+}) {
   if (count <= 0) return null;
   return (
     <div className="pointer-events-none relative h-8 w-full sm:h-10" aria-hidden="true">
       {Array.from({ length: count }).map((_, i) => {
         const [x, y] = STONE_OFFSETS[i % STONE_OFFSETS.length];
         const size = 7 + ((cellIndex + i) % 3) * 2;
+        const isFresh = i === freshIndex;
         return (
           <span
             key={i}
-            className="animate-pop-in absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFresh ? "animate-seed-drop" : "animate-pop-in"}`}
             style={{
               left: `${x}%`,
               top: `${y}%`,
-              width: size,
-              height: size,
+              width: isFresh ? size + 2 : size,
+              height: isFresh ? size + 2 : size,
               backgroundColor: stoneColor(cellIndex, i),
-              boxShadow: "inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 1px rgba(255,255,255,0.7), 0 1px 1px rgba(46,42,33,0.3)",
+              boxShadow: isFresh
+                ? "inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 1px rgba(255,255,255,0.7), 0 3px 6px -1px rgba(217,119,6,0.55)"
+                : "inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 1px rgba(255,255,255,0.7), 0 1px 1px rgba(46,42,33,0.3)",
             }}
           />
         );
@@ -1036,6 +1131,7 @@ function Board({
   selectable,
   selectedCell,
   highlightIndex,
+  trailIndices,
   onCellClick,
 }: {
   ring: number[];
@@ -1043,6 +1139,7 @@ function Board({
   selectable: boolean;
   selectedCell: number | null;
   highlightIndex: number | null;
+  trailIndices: number[];
   onCellClick: (i: number) => void;
 }) {
   return (
@@ -1050,7 +1147,7 @@ function Board({
       <div className="relative flex min-w-[560px] items-stretch gap-2 rounded-[2.5rem] border-4 border-[#8a5a28]/50 bg-gradient-to-br from-[#d9a362] to-[#9c6a34] p-3 shadow-[inset_0_2px_10px_rgba(255,255,255,0.25),inset_0_-6px_16px_rgba(46,42,33,0.3),0_14px_30px_-14px_rgba(46,42,33,0.45)] sm:gap-3 sm:p-4">
         <div className="pointer-events-none absolute inset-3 rounded-[2rem] bg-wood-grain opacity-60 sm:inset-4" />
 
-        <QuanCell index={QUAN_L} ring={ring} highlightIndex={highlightIndex} />
+        <QuanCell index={QUAN_L} ring={ring} highlightIndex={highlightIndex} trailRank={trailIndices.indexOf(QUAN_L)} />
 
         <div className="relative z-10 grid flex-1 grid-rows-2 gap-2 sm:gap-3">
           <div className="grid grid-cols-5 gap-2 sm:gap-3">
@@ -1064,6 +1161,7 @@ function Board({
                 clickable={selectable && activeTeam === "B" && ring[idx] > 0}
                 selected={selectedCell === idx}
                 highlighted={highlightIndex === idx}
+                trailRank={trailIndices.indexOf(idx)}
                 onClick={onCellClick}
               />
             ))}
@@ -1079,28 +1177,46 @@ function Board({
                 clickable={selectable && activeTeam === "A" && ring[idx] > 0}
                 selected={selectedCell === idx}
                 highlighted={highlightIndex === idx}
+                trailRank={trailIndices.indexOf(idx)}
                 onClick={onCellClick}
               />
             ))}
           </div>
         </div>
 
-        <QuanCell index={QUAN_R} ring={ring} highlightIndex={highlightIndex} />
+        <QuanCell index={QUAN_R} ring={ring} highlightIndex={highlightIndex} trailRank={trailIndices.indexOf(QUAN_R)} />
       </div>
     </div>
   );
 }
 
-function QuanCell({ index, ring, highlightIndex }: { index: number; ring: number[]; highlightIndex: number | null }) {
+function QuanCell({
+  index,
+  ring,
+  highlightIndex,
+  trailRank,
+}: {
+  index: number;
+  ring: number[];
+  highlightIndex: number | null;
+  trailRank: number;
+}) {
   const count = ring[index];
   const closed = count === -1;
   const glow = highlightIndex === index;
+  const trailing = !glow && trailRank >= 0;
   return (
     <div
-      className={`relative z-10 flex w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[2.5rem] border-[3px] border-[#6b4017]/50 bg-gradient-to-b from-[#f4dfb8] to-[#e4c489] py-4 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_4px_10px_rgba(46,42,33,0.25)] sm:w-24 ${
+      className={`relative z-10 flex w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[2.5rem] border-[3px] border-[#6b4017]/50 bg-gradient-to-b from-[#f4dfb8] to-[#e4c489] py-4 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_4px_10px_rgba(46,42,33,0.25)] transition sm:w-24 ${
         closed ? "opacity-70" : ""
-      } ${glow ? "ring-4 ring-(--color-sun)/60" : ""}`}
+      } ${glow ? "animate-cell-bounce ring-4 ring-(--color-sun-dark)/70" : trailing ? "ring-2 ring-(--color-sun)/35" : ""}`}
     >
+      {glow && (
+        <span
+          aria-hidden="true"
+          className="animate-seed-flash pointer-events-none absolute inset-0 rounded-[2.5rem] bg-(--color-sun)/40"
+        />
+      )}
       <span className="text-[9px] font-extrabold uppercase tracking-wide text-(--color-ink)/50">Quan</span>
       {closed ? (
         <span className="animate-pop-in text-3xl">🏆</span>
@@ -1109,7 +1225,7 @@ function QuanCell({ index, ring, highlightIndex }: { index: number; ring: number
           <div className="relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-(--color-sun) to-(--color-sun-dark) text-xs font-extrabold text-white shadow-[inset_0_-2px_3px_rgba(0,0,0,0.25),inset_0_2px_2px_rgba(255,255,255,0.5)] sm:size-10">
             10
           </div>
-          <span className="text-xs font-bold text-(--color-ink)/60">{count}</span>
+          <span className={`text-xs font-bold text-(--color-ink)/60 ${glow ? "animate-seed-drop inline-block" : ""}`}>{count}</span>
         </>
       )}
     </div>
@@ -1124,6 +1240,7 @@ function Cell({
   clickable,
   selected,
   highlighted,
+  trailRank,
   onClick,
 }: {
   index: number;
@@ -1133,11 +1250,14 @@ function Cell({
   clickable: boolean;
   selected: boolean;
   highlighted: boolean;
+  /** Position of this cell in the recently-sown trail (-1 = not in trail). */
+  trailRank: number;
   onClick?: (i: number) => void;
 }) {
   const tint = TEAM_TINT[owner];
   const displayCount = Math.min(count, 14);
   const overflow = count - 14;
+  const trailing = !highlighted && !selected && trailRank >= 0;
 
   return (
     <button
@@ -1148,14 +1268,23 @@ function Cell({
         selected
           ? `scale-105 border-(--color-sun-dark) ${tint.bgLight} shadow-[0_0_0_4px_rgba(217,119,6,0.25)]`
           : highlighted
-            ? `border-(--color-sun) ${tint.bgLight}`
-            : "border-[#8a5a28]/25"
-      } ${clickable ? "animate-glow cursor-pointer hover:-translate-y-0.5" : "cursor-default opacity-95"}`}
+            ? `scale-105 border-(--color-sun-dark) ${tint.bgLight}`
+            : trailing
+              ? "border-(--color-sun)/50"
+              : "border-[#8a5a28]/25"
+      } ${highlighted ? "animate-cell-bounce" : ""} ${clickable ? "animate-glow cursor-pointer hover:-translate-y-0.5" : "cursor-default opacity-95"}`}
+      style={trailing ? { boxShadow: `0 0 0 3px rgba(251,191,36,${(0.3 - trailRank * 0.08).toFixed(2)})` } : undefined}
     >
+      {highlighted && (
+        <span
+          aria-hidden="true"
+          className="animate-seed-flash pointer-events-none absolute inset-0 rounded-2xl bg-(--color-sun)/40"
+        />
+      )}
       <span className={`absolute -top-2 -left-2 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold text-white shadow-sm ${tint.bg}`}>
         {label}
       </span>
-      <StoneCluster cellIndex={index} count={displayCount} />
+      <StoneCluster cellIndex={index} count={displayCount} freshIndex={highlighted ? displayCount - 1 : -1} />
       {overflow > 0 && (
         <span className="absolute -bottom-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-(--color-sun-dark) text-[9px] font-extrabold text-white shadow-sm">
           +{overflow}

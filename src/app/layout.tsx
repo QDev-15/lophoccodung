@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="vi"
       className={`${nunito.variable} ${baloo2.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-(--color-cream) text-(--color-cocoa)">
+      <body className="min-h-full flex flex-col bg-(--color-cloud) text-(--color-ink)">
         {children}
       </body>
     </html>

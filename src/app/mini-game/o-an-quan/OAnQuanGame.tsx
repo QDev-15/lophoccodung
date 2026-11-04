@@ -24,6 +24,7 @@ import {
 } from "@/lib/o-an-quan/engine";
 import { generateQuestion, type MathQuestion, type MathSettings, type MathOperationFilter, type TableFilter, type RangeFilter, type DifficultyFilter } from "@/lib/o-an-quan/math";
 import { playCorrect, playWrong, playCapture, playSeed, playWin } from "@/lib/o-an-quan/sound";
+import { IconChip } from "@/components/IconChip";
 
 type Phase = "intro" | "setup" | "playing" | "finished";
 type TurnPhase = "choose-cell" | "question" | "direction" | "animating" | "feedback-wrong";
@@ -46,16 +47,44 @@ const DEFAULT_SETTINGS: GameSettings = {
   answerSeconds: 15,
 };
 
-const TEAM_TINT: Record<Team, { text: string; bg: string; bgLight: string; ring: string }> = {
-  A: { text: "text-(--color-sky)", bg: "bg-(--color-sky)", bgLight: "bg-(--color-sky-light)", ring: "ring-(--color-sky)" },
-  B: { text: "text-(--color-lavender)", bg: "bg-(--color-lavender)", bgLight: "bg-violet-100", ring: "ring-(--color-lavender)" },
+// Two teams, two fixed identity colors (mint = Team A, lavender = Team B). `bloom` is
+// reserved project-wide for upsell/monetization surfaces, so it never appears here.
+const TEAM_TINT: Record<
+  Team,
+  { text: string; bg: string; bgLight: string; ring: string; gradient: string; chip: "mint" | "lavender" }
+> = {
+  A: {
+    text: "text-(--color-mint-dark)",
+    bg: "bg-(--color-mint-dark)",
+    bgLight: "bg-(--color-mint-light)",
+    ring: "ring-(--color-mint-dark)",
+    gradient: "from-(--color-mint) to-(--color-mint-dark)",
+    chip: "mint",
+  },
+  B: {
+    text: "text-(--color-lavender)",
+    bg: "bg-(--color-lavender)",
+    bgLight: "bg-violet-100",
+    ring: "ring-(--color-lavender)",
+    gradient: "from-(--color-lavender) to-[#5b21b6]",
+    chip: "lavender",
+  },
 };
 
-const STONE_PALETTE = ["--color-honey", "--color-mint", "--color-sky", "--color-lavender", "--color-peach", "--color-honey-dark"];
+// Bead colors cycle through the palette, minus `bloom` (reserved for upsell, never decorative).
+const STONE_PALETTE = ["--color-mint", "--color-mint-dark", "--color-lavender", "--color-sun-dark", "--color-peach"];
 
 function stoneColor(cellIndex: number, i: number) {
   return `var(${STONE_PALETTE[(cellIndex * 3 + i * 5) % STONE_PALETTE.length]})`;
 }
+
+// Deterministic "scattered pile" layout (percent offsets within a cell) so beads look
+// hand-tossed rather than snapped to a perfect grid, without re-randomizing on every render.
+const STONE_OFFSETS: Array<[number, number]> = [
+  [50, 46], [33, 36], [67, 38], [40, 62], [61, 64],
+  [23, 56], [77, 54], [50, 24], [35, 20], [65, 20],
+  [17, 40], [83, 42], [50, 74], [29, 78], [71, 78], [50, 48],
+];
 
 export function OAnQuanGame() {
   const [phase, setPhase] = useState<Phase>("intro");
@@ -296,10 +325,17 @@ export function OAnQuanGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turnPhase, sowStepIdx, sowSteps]);
 
+  // Purely presentational: which cell is currently receiving a bead while the sowing
+  // animation plays. Derived from existing state, not a new piece of game state.
+  const highlightIndex =
+    turnPhase === "animating" && sowSteps && sowStepIdx > 0
+      ? sowSteps[Math.min(sowStepIdx - 1, sowSteps.length - 1)]?.highlight ?? null
+      : null;
+
   return (
     <div
       ref={wrapperRef}
-      className="min-h-[70vh] rounded-3xl bg-gradient-to-b from-(--color-mint-light) to-(--color-honey-light) p-4 shadow-[0_8px_32px_-12px_rgba(62,40,27,0.2)] md:p-6"
+      className="relative min-h-[75vh] overflow-hidden rounded-[2rem] bg-(--color-cloud) p-4 shadow-[0_16px_40px_-16px_rgba(46,42,33,0.3)] sm:rounded-[2.5rem] md:p-6"
     >
       <TopBar
         onInstructions={() => setShowInstructions(true)}
@@ -330,6 +366,7 @@ export function OAnQuanGame() {
           activeTeam={activeTeam}
           turnPhase={turnPhase}
           selectedCell={selectedCell}
+          highlightIndex={highlightIndex}
           question={question}
           secondsLeft={secondsLeft}
           answerSeconds={settings.answerSeconds}
@@ -351,8 +388,107 @@ export function OAnQuanGame() {
 }
 
 // ---------------------------------------------------------------------------
+// Decorative village backdrop — shared across intro / setup / playing.
+// No illustration assets exist in this codebase; the "village" feel is built
+// entirely from layered CSS gradients, blurred color blobs, emoji and a tiny
+// hand-rolled inline SVG hut.
+// ---------------------------------------------------------------------------
+
+function ThatchedHut({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 100" className={className} role="presentation" aria-hidden="true">
+      <polygon points="60,6 112,46 8,46" fill="#c88a4a" stroke="#8a5a28" strokeWidth="3" strokeLinejoin="round" />
+      <rect x="24" y="46" width="72" height="46" rx="4" fill="#fde8c9" stroke="#b9823f" strokeWidth="3" />
+      <rect x="50" y="62" width="20" height="30" rx="3" fill="#8a5a28" />
+      <rect x="32" y="58" width="14" height="14" rx="2" fill="#dcfce7" stroke="#8a5a28" strokeWidth="2" />
+      <rect x="74" y="58" width="14" height="14" rx="2" fill="#dcfce7" stroke="#8a5a28" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function VillageScene({ variant = "flat" }: { variant?: "rich" | "flat" }) {
+  const rich = variant === "rich";
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      <div
+        className={`absolute inset-0 bg-gradient-to-b ${
+          rich
+            ? "from-(--color-mint-light) via-white to-(--color-sun)/15"
+            : "from-white via-(--color-mint-light)/40 to-(--color-cloud)"
+        }`}
+      />
+      <div className="absolute -top-10 right-8 size-40 rounded-full bg-(--color-sun)/35 blur-3xl" />
+      <div className="absolute left-[12%] top-6 h-8 w-24 rounded-full bg-white/70 blur-md" />
+      <div className="absolute right-[22%] top-4 h-6 w-20 rounded-full bg-white/60 blur-md" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-(--color-mint-light) to-transparent" />
+      <span className="animate-leaf-sway absolute left-[4%] bottom-0 text-6xl opacity-80 sm:text-7xl">🎋</span>
+      <span className="animate-leaf-sway absolute right-[5%] bottom-0 text-5xl opacity-70 sm:text-6xl" style={{ animationDelay: "1.2s" }}>
+        🎋
+      </span>
+      {rich && (
+        <>
+          <span className="animate-float absolute bottom-2 left-[14%] text-7xl sm:text-8xl">🌳</span>
+          <span className="absolute bottom-10 left-[19%] text-2xl">🐔</span>
+          <span className="absolute bottom-7 left-[23%] text-lg">🐥</span>
+          <ThatchedHut className="absolute bottom-0 right-[8%] h-24 w-28 sm:h-28 sm:w-32" />
+          <span className="absolute bottom-1 left-[6%] text-2xl">🌼</span>
+          <span className="absolute bottom-1 left-[45%] text-2xl">🌼</span>
+          <span className="absolute bottom-1 right-[20%] text-2xl">🌼</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Top bar
 // ---------------------------------------------------------------------------
+
+function ChromePill({
+  href,
+  onClick,
+  children,
+}: {
+  href?: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  const classes =
+    "inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-(--color-ink) shadow-[0_2px_0_rgba(46,42,33,0.1),0_6px_14px_-4px_rgba(46,42,33,0.28)] transition hover:-translate-y-0.5 active:translate-y-0";
+  if (href) {
+    return (
+      <Link href={href} className={classes}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} className={classes}>
+      {children}
+    </button>
+  );
+}
+
+function IconCircleButton({
+  onClick,
+  label,
+  children,
+}: {
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex size-11 items-center justify-center rounded-full bg-white text-lg text-(--color-ink) shadow-[0_2px_0_rgba(46,42,33,0.1),0_6px_14px_-4px_rgba(46,42,33,0.28)] transition hover:-translate-y-0.5 active:translate-y-0"
+    >
+      {children}
+    </button>
+  );
+}
 
 function TopBar({
   onInstructions,
@@ -368,37 +504,15 @@ function TopBar({
   onToggleSound: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href="/mini-game"
-          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-(--color-cocoa) shadow-sm transition hover:-translate-y-0.5"
-        >
-          ← Về Mini game
-        </Link>
-        <button
-          type="button"
-          onClick={onFullscreen}
-          className="flex size-9 items-center justify-center rounded-full bg-white text-(--color-cocoa) shadow-sm transition hover:-translate-y-0.5"
-          aria-label="Toàn màn hình"
-        >
+        <ChromePill href="/mini-game">← Về Mini game</ChromePill>
+        <IconCircleButton onClick={onFullscreen} label="Toàn màn hình">
           {isFullscreen ? "⤢" : "⛶"}
-        </button>
-        <button
-          type="button"
-          onClick={onInstructions}
-          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-(--color-cocoa) shadow-sm transition hover:-translate-y-0.5"
-        >
-          📖 Hướng dẫn chi tiết
-        </button>
+        </IconCircleButton>
+        <ChromePill onClick={onInstructions}>📖 Hướng dẫn chi tiết</ChromePill>
       </div>
-      <button
-        type="button"
-        onClick={onToggleSound}
-        className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-(--color-cocoa) shadow-sm transition hover:-translate-y-0.5"
-      >
-        {soundOn ? "🔊 ÂM THANH: BẬT" : "🔇 ÂM THANH: TẮT"}
-      </button>
+      <ChromePill onClick={onToggleSound}>{soundOn ? "🔊 Âm thanh: Bật" : "🔇 Âm thanh: Tắt"}</ChromePill>
     </div>
   );
 }
@@ -420,43 +534,50 @@ const RULES = [
 function InstructionsModal({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-cocoa)/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-ink)/55 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="animate-pop-in max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+        className="animate-pop-in max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] bg-white shadow-[0_24px_48px_-16px_rgba(46,42,33,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-extrabold text-(--color-cocoa)">CÁCH CHƠI</h2>
+        <div className="flex items-center justify-between rounded-t-[2rem] bg-gradient-to-r from-(--color-sun) to-(--color-sun-dark) px-6 py-4">
+          <h2 className="font-display text-xl font-extrabold text-white">📖 CÁCH CHƠI</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full bg-(--color-cream) text-(--color-cocoa) hover:bg-(--color-honey-light)"
             aria-label="Đóng"
+            className="flex size-11 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
           >
             ✕
           </button>
         </div>
-        <p className="mt-2 text-sm text-(--color-cocoa)/70">
-          Ô Ăn Quan là trò chơi dân gian của hai đội. Trả lời đúng phép tính để được rải quân, ăn
-          thật nhiều sỏi và quân quan nhé!
-        </p>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {RULES.map((rule, i) => (
-            <div key={i} className="rounded-2xl border border-dashed border-(--color-sky)/30 bg-(--color-sky-light)/40 p-3 text-sm text-(--color-cocoa)/85">
-              <span className="font-bold text-(--color-sky)">{i + 1}. </span>
-              {rule}
-            </div>
-          ))}
+        <div className="p-6">
+          <p className="text-sm text-(--color-ink)/70">
+            Ô Ăn Quan là trò chơi dân gian của hai đội. Trả lời đúng phép tính để được rải quân, ăn
+            thật nhiều sỏi và quân quan nhé!
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {RULES.map((rule, i) => (
+              <div
+                key={i}
+                className="flex gap-2 rounded-2xl border-2 border-dashed border-(--color-mint)/40 bg-(--color-mint-light)/50 p-3 text-sm text-(--color-ink)/85"
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-(--color-mint-dark) text-xs font-extrabold text-white">
+                  {i + 1}
+                </span>
+                <span>{rule}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-6 min-h-12 w-full rounded-full bg-(--color-sun-dark) py-3 text-base font-bold text-white shadow-[0_4px_0_#92400e] transition hover:brightness-105 active:translate-y-0.5 active:shadow-none"
+          >
+            ĐÃ HIỂU
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-6 w-full rounded-full bg-(--color-honey) py-3 text-base font-bold text-white transition hover:bg-(--color-honey-dark)"
-        >
-          ĐÃ HIỂU
-        </button>
       </div>
     </div>
   );
@@ -466,52 +587,99 @@ function InstructionsModal({ onClose }: { onClose: () => void }) {
 // Intro screen
 // ---------------------------------------------------------------------------
 
+function TitleBanner() {
+  return (
+    <div className="relative mt-2 flex flex-col items-center">
+      <div className="h-2 w-40 rounded-full bg-[#c88a4a] shadow-sm sm:w-56" />
+      <div className="flex w-full max-w-56 justify-between px-6">
+        <span className="h-5 w-0.5 bg-(--color-ink)/25" />
+        <span className="h-5 w-0.5 bg-(--color-ink)/25" />
+      </div>
+      <div
+        className="animate-banner-sway relative -mt-0.5 rounded-2xl bg-gradient-to-b from-[#c88a4a] to-[#8a5a28] px-10 py-4 shadow-[0_12px_28px_-10px_rgba(46,42,33,0.5)] sm:px-16 sm:py-5"
+        style={{ transformOrigin: "top center" }}
+      >
+        <h1
+          className="font-display select-none text-4xl font-extrabold tracking-wide text-(--color-sun) sm:text-6xl"
+          style={{ textShadow: "0 2px 0 #6b3f14, 0 4px 0 #6b3f14, 0 8px 16px rgba(46,42,33,0.45)" }}
+        >
+          Ô ĂN QUAN
+        </h1>
+        <span className="absolute -bottom-3 left-2 h-0 w-0 border-x-[14px] border-t-[14px] border-x-transparent border-t-[#6b3f14]" />
+        <span className="absolute -bottom-3 right-2 h-0 w-0 border-x-[14px] border-t-[14px] border-x-transparent border-t-[#6b3f14]" />
+      </div>
+    </div>
+  );
+}
+
+function SignpostTag() {
+  return (
+    <div
+      className="relative mt-5 inline-flex items-center gap-1 rounded-lg bg-[#fde8c9] px-3 py-1.5 text-xs font-bold text-(--color-ink) shadow-[0_3px_8px_-2px_rgba(46,42,33,0.35)]"
+      style={{ transform: "rotate(-3deg)" }}
+    >
+      <span aria-hidden="true" className="absolute -top-2 left-1/2 h-2 w-0.5 -translate-x-1/2 bg-(--color-ink)/30" />
+      Học Toán qua trò chơi dân gian <span className="text-(--color-sun-dark)">♥</span>
+    </div>
+  );
+}
+
 function IntroScreen({ onStart, onInstructions }: { onStart: () => void; onInstructions: () => void }) {
   return (
-    <div className="relative mt-4 flex flex-col items-center overflow-hidden rounded-3xl bg-gradient-to-b from-(--color-sky-light) via-(--color-mint-light) to-(--color-honey-light) px-6 py-14 text-center">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <span className="animate-float absolute left-[8%] top-10 text-4xl" style={{ animationDelay: "0s" }}>🌾</span>
-        <span className="animate-float absolute right-[10%] top-16 text-4xl" style={{ animationDelay: "0.5s" }}>🎋</span>
-        <span className="animate-twinkle absolute left-[20%] bottom-10 text-3xl" style={{ animationDelay: "0.2s" }}>✨</span>
-        <span className="animate-twinkle absolute right-[18%] bottom-16 text-3xl" style={{ animationDelay: "0.8s" }}>🌼</span>
+    <div className="relative mt-4 overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem]">
+      <VillageScene variant="rich" />
+      <div className="relative z-10 flex flex-col items-center px-6 py-10 text-center sm:py-14">
+        <span className="animate-pop-in rounded-full bg-white px-4 py-1.5 text-sm font-bold text-(--color-sun-dark) shadow-[0_4px_12px_-2px_rgba(46,42,33,0.25)]">
+          🎉 Học Toán qua trò chơi dân gian
+        </span>
+
+        <TitleBanner />
+        <SignpostTag />
+
+        <p className="relative mt-5 max-w-md text-base text-(--color-ink)/75">
+          Hai đội thi tài rải sỏi, ăn quân và so tài phép tính — trò chơi dân gian quen thuộc, không
+          cần đăng nhập.
+        </p>
+
+        <div className="relative mt-8 flex h-24 w-full max-w-xs items-end justify-center">
+          <div className="absolute bottom-0 h-8 w-44 rounded-[50%] bg-[#8a5a28]/15 blur-[2px]" />
+          <div className="relative flex gap-2 text-5xl sm:text-6xl">
+            <span className="animate-float" style={{ animationDelay: "0s" }}>
+              🧒
+            </span>
+            <span className="animate-float" style={{ animationDelay: "0.3s" }}>
+              👧
+            </span>
+            <span className="animate-float text-4xl sm:text-5xl" style={{ animationDelay: "0.15s" }}>
+              🟤
+            </span>
+            <span className="animate-float" style={{ animationDelay: "0.6s" }}>
+              👦
+            </span>
+            <span className="animate-float" style={{ animationDelay: "0.9s" }}>
+              🧑‍🎓
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onStart}
+          className="animate-glow group relative mt-8 overflow-hidden rounded-full bg-(--color-sun-dark) px-12 py-4 text-xl font-extrabold text-white shadow-[0_6px_0_#92400e,0_14px_28px_-8px_rgba(217,119,6,0.55)] transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_2px_0_#92400e]"
+          style={{ transitionTimingFunction: "var(--ease-bounce)" }}
+        >
+          <span aria-hidden="true" className="animate-shine absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-white/30" />
+          BẮT ĐẦU
+        </button>
+
+        <button
+          type="button"
+          onClick={onInstructions}
+          className="relative mt-4 inline-flex min-h-11 items-center px-2 text-sm font-bold text-(--color-ink)/60 underline-offset-4 hover:text-(--color-sun-dark) hover:underline"
+        >
+          Xem cách chơi trước
+        </button>
       </div>
-
-      <span className="animate-pop-in relative rounded-full bg-white px-4 py-1.5 text-sm font-bold text-(--color-honey-dark) shadow-sm">
-        🎉 Học Toán qua trò chơi dân gian
-      </span>
-
-      <h1 className="font-display relative mt-6 text-5xl font-extrabold text-(--color-cocoa) drop-shadow-sm sm:text-6xl">
-        Ô ĂN QUAN
-      </h1>
-      <p className="relative mt-3 max-w-md text-(--color-cocoa)/70">
-        Hai đội thi tài rải sỏi, ăn quân và so tài phép tính — trò chơi dân gian quen thuộc, không
-        cần đăng nhập.
-      </p>
-
-      <div className="relative mt-8 flex gap-3 text-6xl">
-        <span className="animate-float" style={{ animationDelay: "0s" }}>🧒</span>
-        <span className="animate-float" style={{ animationDelay: "0.3s" }}>👧</span>
-        <span className="animate-float" style={{ animationDelay: "0.6s" }}>🟤</span>
-        <span className="animate-float" style={{ animationDelay: "0.9s" }}>👦</span>
-      </div>
-
-      <button
-        type="button"
-        onClick={onStart}
-        className="animate-glow group relative mt-10 overflow-hidden rounded-full bg-(--color-honey) px-12 py-4 text-xl font-extrabold text-white transition hover:bg-(--color-honey-dark) active:scale-95"
-        style={{ transitionTimingFunction: "var(--ease-bounce)" }}
-      >
-        <span aria-hidden="true" className="animate-shine absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-white/30" />
-        BẮT ĐẦU
-      </button>
-
-      <button
-        type="button"
-        onClick={onInstructions}
-        className="relative mt-4 text-sm font-bold text-(--color-cocoa)/60 underline-offset-4 hover:text-(--color-honey-dark) hover:underline"
-      >
-        Xem cách chơi trước
-      </button>
     </div>
   );
 }
@@ -536,14 +704,25 @@ function Pill<T extends string | number>({
     <button
       type="button"
       onClick={() => onClick(value)}
-      className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+      className={`min-h-11 rounded-full px-4 py-2 text-sm font-bold transition active:translate-y-0.5 ${
         active
-          ? "bg-(--color-mint) text-white shadow-[0_6px_14px_-4px_rgba(0,187,127,0.5)]"
-          : "bg-white text-(--color-cocoa)/70 hover:bg-(--color-mint-light)"
+          ? "bg-(--color-mint) text-white shadow-[0_3px_0_var(--color-mint-dark),0_8px_16px_-4px_rgba(34,197,94,0.5)]"
+          : "border-2 border-(--color-ink)/15 bg-white text-(--color-ink)/70 hover:bg-(--color-mint-light)"
       }`}
     >
       {label}
     </button>
+  );
+}
+
+function SettingRow({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-5">
+      <span className="text-sm font-bold text-(--color-ink)/80">
+        {icon} {label}
+      </span>
+      <div className="mt-2 flex flex-wrap gap-2">{children}</div>
+    </div>
   );
 }
 
@@ -563,97 +742,97 @@ function SetupScreen({
   }
 
   return (
-    <div className="animate-pop-in mx-auto mt-4 max-w-2xl rounded-3xl bg-white/90 p-6 shadow-[0_8px_32px_-12px_rgba(62,40,27,0.25)] sm:p-8">
-      <h2 className="font-display text-center text-2xl font-extrabold text-(--color-cocoa)">
-        CHUẨN BỊ THI ĐẤU
-      </h2>
+    <div className="relative mt-4 overflow-hidden rounded-[1.75rem] px-2 py-8 sm:rounded-[2.25rem] sm:py-12">
+      <VillageScene variant="flat" />
+      <div className="animate-pop-in relative z-10 mx-auto max-w-2xl rounded-[2rem] border-4 border-[#c88a4a]/50 bg-white/95 p-6 shadow-[0_16px_40px_-16px_rgba(46,42,33,0.35)] sm:p-8">
+        <h2 className="font-display text-center text-2xl font-extrabold text-(--color-sun-dark) sm:text-3xl">
+          🧮 CHUẨN BỊ THI ĐẤU
+        </h2>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-bold text-(--color-sky)">Đội 1 (hàng dưới)</span>
-          <input
-            value={settings.teamAName}
-            onChange={(e) => set("teamAName", e.target.value.toUpperCase().slice(0, 16))}
-            className="rounded-full border-2 border-(--color-sky)/30 px-4 py-2 font-bold text-(--color-cocoa) focus:border-(--color-sky) focus:outline-none"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-bold text-(--color-lavender)">Đội 2 (hàng trên)</span>
-          <input
-            value={settings.teamBName}
-            onChange={(e) => set("teamBName", e.target.value.toUpperCase().slice(0, 16))}
-            className="rounded-full border-2 border-(--color-lavender)/30 px-4 py-2 font-bold text-(--color-cocoa) focus:border-(--color-lavender) focus:outline-none"
-          />
-        </label>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-bold text-(--color-mint-dark)">Đội 1 (hàng dưới)</span>
+            <input
+              value={settings.teamAName}
+              onChange={(e) => set("teamAName", e.target.value.toUpperCase().slice(0, 16))}
+              className="min-h-11 rounded-full border-2 border-(--color-mint)/40 bg-white px-4 py-2 font-bold text-(--color-ink) outline-none transition focus:border-(--color-mint-dark) focus:shadow-[0_0_0_4px_rgba(21,128,61,0.25)]"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-bold text-(--color-lavender)">Đội 2 (hàng trên)</span>
+            <input
+              value={settings.teamBName}
+              onChange={(e) => set("teamBName", e.target.value.toUpperCase().slice(0, 16))}
+              className="min-h-11 rounded-full border-2 border-(--color-lavender)/40 bg-white px-4 py-2 font-bold text-(--color-ink) outline-none transition focus:border-(--color-lavender) focus:shadow-[0_0_0_4px_rgba(139,92,246,0.25)]"
+            />
+          </label>
+        </div>
+
+        <SettingRow icon="➗" label="Phép tính">
+          {(["all", "+", "-", "×", "÷"] as MathOperationFilter[]).map((op) => (
+            <Pill
+              key={op}
+              value={op}
+              current={settings.operation}
+              label={{ all: "Tất cả", "+": "Cộng", "-": "Trừ", "×": "Nhân", "÷": "Chia" }[op]}
+              onClick={(v) => set("operation", v)}
+            />
+          ))}
+        </SettingRow>
+
+        <SettingRow icon="🔢" label="Bảng">
+          {(["all", 2, 3, 4, 5, 6, 7, 8, 9] as TableFilter[]).map((t) => (
+            <Pill key={t} value={t} current={settings.table} label={t === "all" ? "Tất cả" : String(t)} onClick={(v) => set("table", v)} />
+          ))}
+        </SettingRow>
+
+        <SettingRow icon="📏" label="Phạm vi">
+          {([10, 20, 50, 100] as RangeFilter[]).map((r) => (
+            <Pill key={r} value={r} current={settings.range} label={`1–${r}`} onClick={(v) => set("range", v)} />
+          ))}
+        </SettingRow>
+
+        <SettingRow icon="🎯" label="Độ khó">
+          {(["easy", "advanced"] as DifficultyFilter[]).map((d) => (
+            <Pill key={d} value={d} current={settings.difficulty} label={d === "easy" ? "Dễ" : "Nâng cao"} onClick={(v) => set("difficulty", v)} />
+          ))}
+        </SettingRow>
+
+        <SettingRow icon="🔁" label="Số lượt mỗi đội">
+          {([10, 15, 20, "free"] as (number | "free")[]).map((v) => (
+            <Pill key={v} value={v} current={settings.turnsPerTeam} label={v === "free" ? "Tự do" : String(v)} onClick={(val) => set("turnsPerTeam", val)} />
+          ))}
+        </SettingRow>
+
+        <SettingRow icon="⏱️" label="Thời gian trả lời">
+          {([10, 15, 20, 30, "unlimited"] as (number | "unlimited")[]).map((v) => (
+            <Pill
+              key={v}
+              value={v}
+              current={settings.answerSeconds}
+              label={v === "unlimited" ? "Không giới hạn" : `${v} giây`}
+              onClick={(val) => set("answerSeconds", val)}
+            />
+          ))}
+        </SettingRow>
+
+        <div className="mt-8 flex gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="min-h-12 flex-1 rounded-full border-2 border-(--color-ink)/15 py-3 text-base font-bold text-(--color-ink) transition hover:bg-(--color-cloud)"
+          >
+            QUAY LẠI
+          </button>
+          <button
+            type="button"
+            onClick={onStart}
+            className="min-h-12 flex-[2] rounded-full bg-(--color-mint) py-3 text-base font-extrabold text-white shadow-[0_8px_20px_-6px_rgba(34,197,94,0.5)] transition hover:brightness-95"
+          >
+            BẮT ĐẦU THI ĐẤU
+          </button>
+        </div>
       </div>
-
-      <SettingRow label="Phép tính">
-        {(["all", "+", "-", "×", "÷"] as MathOperationFilter[]).map((op) => (
-          <Pill
-            key={op}
-            value={op}
-            current={settings.operation}
-            label={{ all: "Tất cả", "+": "Cộng", "-": "Trừ", "×": "Nhân", "÷": "Chia" }[op]}
-            onClick={(v) => set("operation", v)}
-          />
-        ))}
-      </SettingRow>
-
-      <SettingRow label="Bảng">
-        {(["all", 2, 3, 4, 5, 6, 7, 8, 9] as TableFilter[]).map((t) => (
-          <Pill key={t} value={t} current={settings.table} label={t === "all" ? "Tất cả" : String(t)} onClick={(v) => set("table", v)} />
-        ))}
-      </SettingRow>
-
-      <SettingRow label="Phạm vi">
-        {([10, 20, 50, 100] as RangeFilter[]).map((r) => (
-          <Pill key={r} value={r} current={settings.range} label={`1–${r}`} onClick={(v) => set("range", v)} />
-        ))}
-      </SettingRow>
-
-      <SettingRow label="Độ khó">
-        {(["easy", "advanced"] as DifficultyFilter[]).map((d) => (
-          <Pill key={d} value={d} current={settings.difficulty} label={d === "easy" ? "Dễ" : "Nâng cao"} onClick={(v) => set("difficulty", v)} />
-        ))}
-      </SettingRow>
-
-      <SettingRow label="Số lượt mỗi đội">
-        {([10, 15, 20, "free"] as (number | "free")[]).map((v) => (
-          <Pill key={v} value={v} current={settings.turnsPerTeam} label={v === "free" ? "Tự do" : String(v)} onClick={(val) => set("turnsPerTeam", val)} />
-        ))}
-      </SettingRow>
-
-      <SettingRow label="Thời gian trả lời">
-        {([10, 15, 20, 30, "unlimited"] as (number | "unlimited")[]).map((v) => (
-          <Pill key={v} value={v} current={settings.answerSeconds} label={v === "unlimited" ? "Không giới hạn" : `${v} giây`} onClick={(val) => set("answerSeconds", val)} />
-        ))}
-      </SettingRow>
-
-      <div className="mt-8 flex gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex-1 rounded-full border-2 border-(--color-cocoa)/15 py-3 text-base font-bold text-(--color-cocoa) transition hover:bg-(--color-cream)"
-        >
-          QUAY LẠI
-        </button>
-        <button
-          type="button"
-          onClick={onStart}
-          className="flex-[2] rounded-full bg-(--color-mint) py-3 text-base font-extrabold text-white shadow-[0_8px_20px_-6px_rgba(0,187,127,0.5)] transition hover:brightness-95"
-        >
-          BẮT ĐẦU THI ĐẤU
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SettingRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-5">
-      <span className="text-sm font-bold text-(--color-cocoa)/80">{label}</span>
-      <div className="mt-2 flex flex-wrap gap-2">{children}</div>
     </div>
   );
 }
@@ -662,6 +841,14 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
 // Play screen
 // ---------------------------------------------------------------------------
 
+function InfoChip({ supportStock }: { supportStock: number }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-(--color-ink)/70 shadow-sm">
+      <span aria-hidden="true">🎁</span> Kho hỗ trợ: {supportStock}
+    </div>
+  );
+}
+
 function PlayScreen({
   ring,
   teamA,
@@ -669,6 +856,7 @@ function PlayScreen({
   activeTeam,
   turnPhase,
   selectedCell,
+  highlightIndex,
   question,
   secondsLeft,
   answerSeconds,
@@ -686,6 +874,7 @@ function PlayScreen({
   activeTeam: Team;
   turnPhase: TurnPhase;
   selectedCell: number | null;
+  highlightIndex: number | null;
   question: MathQuestion | null;
   secondsLeft: number | null;
   answerSeconds: number | "unlimited";
@@ -700,74 +889,70 @@ function PlayScreen({
   const activeState = activeTeam === "A" ? teamA : teamB;
 
   return (
-    <div className="mt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <TeamCard team={teamB} teamId="B" active={activeTeam === "B"} turnsPerTeam={turnsPerTeam} />
-        <TurnBanner activeTeam={activeTeam} activeName={activeState.name} />
-        <TeamCard team={teamA} teamId="A" active={activeTeam === "A"} turnsPerTeam={turnsPerTeam} />
-      </div>
+    <div className="relative mt-2 overflow-hidden rounded-[1.75rem] px-3 py-5 sm:rounded-[2.25rem] sm:px-5 sm:py-6">
+      <VillageScene variant="flat" />
+      <div className="relative z-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <InfoChip supportStock={supportStock} />
+          <TurnBanner activeTeam={activeTeam} activeName={activeState.name} />
+          <TeamCard team={teamB} teamId="B" active={activeTeam === "B"} turnsPerTeam={turnsPerTeam} />
+        </div>
 
-      <p className="mt-3 text-center text-xs font-bold text-(--color-cocoa)/50">
-        Kho quân hỗ trợ: {supportStock}
-      </p>
+        <Board
+          ring={ring}
+          activeTeam={activeTeam}
+          selectable={turnPhase === "choose-cell"}
+          selectedCell={selectedCell}
+          highlightIndex={highlightIndex}
+          onCellClick={onCellClick}
+        />
 
-      <Board
-        ring={ring}
-        activeTeam={activeTeam}
-        selectable={turnPhase === "choose-cell"}
-        selectedCell={selectedCell}
-        onCellClick={onCellClick}
-      />
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <TeamCard team={teamA} teamId="A" active={activeTeam === "A"} turnsPerTeam={turnsPerTeam} />
 
-      {turnPhase === "choose-cell" && (
-        <p className="animate-pop-in mt-4 text-center font-display text-lg font-bold text-(--color-cocoa)">
-          👉 Chọn một ô có sỏi nhé!
-        </p>
-      )}
+          <div className="flex-1 text-center">
+            {turnPhase === "choose-cell" && (
+              <p className="animate-pop-in font-display text-base font-bold text-(--color-ink) sm:text-lg">
+                👉 {activeState.name} chọn một ô có sỏi nhé!
+              </p>
+            )}
 
-      {toast && (
-        <p className="animate-pop-in mt-3 text-center text-sm font-bold text-(--color-honey-dark)">
-          {toast}
-        </p>
-      )}
+            {toast && <p className="animate-pop-in mt-1 text-sm font-bold text-(--color-sun-dark)">{toast}</p>}
 
-      {turnPhase === "feedback-wrong" && (
-        <p className="animate-wiggle mt-4 text-center font-display text-lg font-bold text-(--color-bloom)">
-          {feedbackReason === "timeout" ? "⏰ Hết giờ! Nhường lượt cho đội kia." : "❌ Sai rồi! Nhường lượt cho đội kia."}
-        </p>
-      )}
-
-      {turnPhase === "direction" && (
-        <div className="animate-pop-in mt-5 flex flex-col items-center gap-3">
-          <p className="font-display font-bold text-(--color-mint)">✅ Trả lời đúng! Chọn hướng rải nhé</p>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => onDirection(-1)}
-              className="rounded-full bg-(--color-cocoa) px-8 py-3 text-lg font-extrabold text-white transition hover:-translate-y-0.5"
-            >
-              ⬅️ Trái
-            </button>
-            <button
-              type="button"
-              onClick={() => onDirection(1)}
-              className="rounded-full bg-(--color-cocoa) px-8 py-3 text-lg font-extrabold text-white transition hover:-translate-y-0.5"
-            >
-              Phải ➡️
-            </button>
+            {turnPhase === "feedback-wrong" && (
+              <p className="animate-wiggle font-display text-base font-bold text-(--color-ink) sm:text-lg">
+                {feedbackReason === "timeout" ? "⏰ Hết giờ! Nhường lượt cho đội kia." : "❌ Sai rồi! Nhường lượt cho đội kia."}
+              </p>
+            )}
           </div>
         </div>
-      )}
 
-      {turnPhase === "question" && question && (
-        <QuestionModal
-          question={question}
-          activeTeam={activeTeam}
-          secondsLeft={secondsLeft}
-          answerSeconds={answerSeconds}
-          onAnswer={onAnswer}
-        />
-      )}
+        {turnPhase === "direction" && (
+          <div className="animate-pop-in mt-5 flex flex-col items-center gap-3">
+            <p className="font-display font-bold text-(--color-mint-dark)">✅ Trả lời đúng! Chọn hướng rải nhé</p>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => onDirection(-1)}
+                className="min-h-12 rounded-full bg-gradient-to-b from-[#5a4536] to-(--color-ink) px-8 py-3 text-lg font-extrabold text-white shadow-[0_4px_0_rgba(0,0,0,0.25),0_10px_20px_-6px_rgba(46,42,33,0.5)] transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_rgba(0,0,0,0.25)]"
+              >
+                ⬅️ Trái
+              </button>
+              <button
+                type="button"
+                onClick={() => onDirection(1)}
+                className="min-h-12 rounded-full bg-gradient-to-b from-[#5a4536] to-(--color-ink) px-8 py-3 text-lg font-extrabold text-white shadow-[0_4px_0_rgba(0,0,0,0.25),0_10px_20px_-6px_rgba(46,42,33,0.5)] transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_rgba(0,0,0,0.25)]"
+              >
+                Phải ➡️
+              </button>
+            </div>
+          </div>
+        )}
+
+        {turnPhase === "question" && question && (
+          <QuestionModal question={question} activeTeam={activeTeam} secondsLeft={secondsLeft} answerSeconds={answerSeconds} onAnswer={onAnswer} />
+        )}
+      </div>
     </div>
   );
 }
@@ -775,7 +960,9 @@ function PlayScreen({
 function TurnBanner({ activeTeam, activeName }: { activeTeam: Team; activeName: string }) {
   const tint = TEAM_TINT[activeTeam];
   return (
-    <div className={`animate-pop-in rounded-full px-6 py-2.5 text-center font-display text-base font-extrabold text-white shadow-md ${tint.bg}`}>
+    <div
+      className={`animate-pop-in relative rounded-full bg-gradient-to-r ${tint.gradient} px-6 py-2.5 text-center font-display text-sm font-extrabold text-white shadow-[0_6px_16px_-4px_rgba(46,42,33,0.4)] sm:text-base`}
+    >
       ĐẾN LƯỢT {activeName}!
     </div>
   );
@@ -795,23 +982,50 @@ function TeamCard({
   const tint = TEAM_TINT[teamId];
   return (
     <div
-      className={`flex items-center gap-3 rounded-2xl bg-white px-4 py-2.5 shadow-sm transition ${
-        active ? `ring-2 ${tint.ring}` : ""
+      className={`flex items-center gap-3 rounded-2xl bg-white p-1.5 pr-4 shadow-[0_4px_12px_-4px_rgba(46,42,33,0.2)] transition ${
+        active ? `ring-[3px] ${tint.ring} animate-glow` : ""
       }`}
     >
-      <span className={`flex size-10 items-center justify-center rounded-full text-xl ${tint.bgLight}`}>
-        {teamId === "A" ? "🧒" : "👧"}
-      </span>
+      <IconChip icon={teamId === "A" ? "🧒" : "👧"} tint={tint.chip} size="md" />
       <div>
-        <span className={`block text-xs font-bold uppercase ${tint.text}`}>{team.name}</span>
-        <span className="block text-sm font-extrabold text-(--color-cocoa)">
-          Điểm: {team.points} · Quan: {team.quanCaptured}
-        </span>
-        <span className="block text-[11px] text-(--color-cocoa)/50">
-          Giỏ: {team.basket} sỏi
-          {turnsPerTeam !== "free" && ` · Lượt: ${team.turnsUsed}/${turnsPerTeam}`}
-        </span>
+        <span className={`block text-xs font-extrabold uppercase ${tint.text}`}>{team.name}</span>
+        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-(--color-ink)/60">
+          <span>⭐ {team.points}</span>
+          <span>🏆 {team.quanCaptured}</span>
+          <span>🧺 {team.basket}</span>
+          {turnsPerTeam !== "free" && <span>🔁 {team.turnsUsed}/{turnsPerTeam}</span>}
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Board
+// ---------------------------------------------------------------------------
+
+function StoneCluster({ cellIndex, count }: { cellIndex: number; count: number }) {
+  if (count <= 0) return null;
+  return (
+    <div className="pointer-events-none relative h-8 w-full sm:h-10" aria-hidden="true">
+      {Array.from({ length: count }).map((_, i) => {
+        const [x, y] = STONE_OFFSETS[i % STONE_OFFSETS.length];
+        const size = 7 + ((cellIndex + i) % 3) * 2;
+        return (
+          <span
+            key={i}
+            className="animate-pop-in absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              left: `${x}%`,
+              top: `${y}%`,
+              width: size,
+              height: size,
+              backgroundColor: stoneColor(cellIndex, i),
+              boxShadow: "inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 1px rgba(255,255,255,0.7), 0 1px 1px rgba(46,42,33,0.3)",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -821,69 +1035,81 @@ function Board({
   activeTeam,
   selectable,
   selectedCell,
+  highlightIndex,
   onCellClick,
 }: {
   ring: number[];
   activeTeam: Team;
   selectable: boolean;
   selectedCell: number | null;
+  highlightIndex: number | null;
   onCellClick: (i: number) => void;
 }) {
   return (
-    <div className="mt-4 flex items-stretch gap-2 overflow-x-auto rounded-[2rem] bg-gradient-to-br from-[#c88a4a] to-[#a9692c] p-3 shadow-inner sm:gap-3 sm:p-4">
-      <QuanCell index={QUAN_L} ring={ring} />
-      <div className="grid min-w-[320px] flex-1 grid-rows-2 gap-2 sm:gap-3">
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
-          {DISPLAY_ORDER.B.map((idx, i) => (
-            <Cell
-              key={idx}
-              index={idx}
-              label={i + 1}
-              count={ring[idx]}
-              owner="B"
-              clickable={selectable && activeTeam === "B" && ring[idx] > 0}
-              selected={selectedCell === idx}
-            />
-          ))}
+    <div className="relative mt-4 overflow-x-auto">
+      <div className="relative flex min-w-[560px] items-stretch gap-2 rounded-[2.5rem] border-4 border-[#8a5a28]/50 bg-gradient-to-br from-[#d9a362] to-[#9c6a34] p-3 shadow-[inset_0_2px_10px_rgba(255,255,255,0.25),inset_0_-6px_16px_rgba(46,42,33,0.3),0_14px_30px_-14px_rgba(46,42,33,0.45)] sm:gap-3 sm:p-4">
+        <div className="pointer-events-none absolute inset-3 rounded-[2rem] bg-wood-grain opacity-60 sm:inset-4" />
+
+        <QuanCell index={QUAN_L} ring={ring} highlightIndex={highlightIndex} />
+
+        <div className="relative z-10 grid flex-1 grid-rows-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+            {DISPLAY_ORDER.B.map((idx, i) => (
+              <Cell
+                key={idx}
+                index={idx}
+                label={i + 1}
+                count={ring[idx]}
+                owner="B"
+                clickable={selectable && activeTeam === "B" && ring[idx] > 0}
+                selected={selectedCell === idx}
+                highlighted={highlightIndex === idx}
+                onClick={onCellClick}
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+            {DISPLAY_ORDER.A.map((idx, i) => (
+              <Cell
+                key={idx}
+                index={idx}
+                label={i + 1}
+                count={ring[idx]}
+                owner="A"
+                clickable={selectable && activeTeam === "A" && ring[idx] > 0}
+                selected={selectedCell === idx}
+                highlighted={highlightIndex === idx}
+                onClick={onCellClick}
+              />
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
-          {DISPLAY_ORDER.A.map((idx, i) => (
-            <Cell
-              key={idx}
-              index={idx}
-              label={i + 1}
-              count={ring[idx]}
-              owner="A"
-              clickable={selectable && activeTeam === "A" && ring[idx] > 0}
-              selected={selectedCell === idx}
-              onClick={onCellClick}
-            />
-          ))}
-        </div>
+
+        <QuanCell index={QUAN_R} ring={ring} highlightIndex={highlightIndex} />
       </div>
-      <QuanCell index={QUAN_R} ring={ring} />
     </div>
   );
 }
 
-function QuanCell({ index, ring }: { index: number; ring: number[] }) {
+function QuanCell({ index, ring, highlightIndex }: { index: number; ring: number[]; highlightIndex: number | null }) {
   const count = ring[index];
   const closed = count === -1;
+  const glow = highlightIndex === index;
   return (
     <div
-      className={`flex w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-[1.5rem] border-2 border-[#8a5a28]/40 bg-[#f4dfb8] py-3 shadow-inner sm:w-20 ${
-        closed ? "opacity-60" : ""
-      }`}
+      className={`relative z-10 flex w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[2.5rem] border-[3px] border-[#6b4017]/50 bg-gradient-to-b from-[#f4dfb8] to-[#e4c489] py-4 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_4px_10px_rgba(46,42,33,0.25)] sm:w-24 ${
+        closed ? "opacity-70" : ""
+      } ${glow ? "ring-4 ring-(--color-sun)/60" : ""}`}
     >
-      <span className="text-[10px] font-bold uppercase text-(--color-cocoa)/50">Quan</span>
+      <span className="text-[9px] font-extrabold uppercase tracking-wide text-(--color-ink)/50">Quan</span>
       {closed ? (
-        <span className="text-2xl">🏆</span>
+        <span className="animate-pop-in text-3xl">🏆</span>
       ) : (
         <>
-          <span className="flex size-8 items-center justify-center rounded-full bg-(--color-honey) text-xs font-extrabold text-white sm:size-9">
+          <div className="relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-(--color-sun) to-(--color-sun-dark) text-xs font-extrabold text-white shadow-[inset_0_-2px_3px_rgba(0,0,0,0.25),inset_0_2px_2px_rgba(255,255,255,0.5)] sm:size-10">
             10
-          </span>
-          <span className="text-xs font-bold text-(--color-cocoa)/60">{count}</span>
+          </div>
+          <span className="text-xs font-bold text-(--color-ink)/60">{count}</span>
         </>
       )}
     </div>
@@ -897,6 +1123,7 @@ function Cell({
   owner,
   clickable,
   selected,
+  highlighted,
   onClick,
 }: {
   index: number;
@@ -905,31 +1132,36 @@ function Cell({
   owner: Team;
   clickable: boolean;
   selected: boolean;
+  highlighted: boolean;
   onClick?: (i: number) => void;
 }) {
   const tint = TEAM_TINT[owner];
+  const displayCount = Math.min(count, 14);
+  const overflow = count - 14;
+
   return (
     <button
       type="button"
       disabled={!clickable}
       onClick={() => onClick?.(index)}
-      className={`relative flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border-2 bg-[#fff6e6] p-2 transition sm:min-h-20 ${
-        selected ? `scale-105 border-(--color-honey-dark) ${tint.bgLight}` : "border-[#8a5a28]/20"
-      } ${clickable ? "animate-glow cursor-pointer hover:-translate-y-0.5" : "cursor-default opacity-90"}`}
+      className={`relative flex min-h-16 flex-col items-center justify-center rounded-2xl border-2 bg-gradient-to-b from-[#fff6e6] to-[#fbe7c4] p-2 shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_2px_4px_rgba(46,42,33,0.12)] transition sm:min-h-24 ${
+        selected
+          ? `scale-105 border-(--color-sun-dark) ${tint.bgLight} shadow-[0_0_0_4px_rgba(217,119,6,0.25)]`
+          : highlighted
+            ? `border-(--color-sun) ${tint.bgLight}`
+            : "border-[#8a5a28]/25"
+      } ${clickable ? "animate-glow cursor-pointer hover:-translate-y-0.5" : "cursor-default opacity-95"}`}
     >
-      <span className={`absolute -top-2 -left-2 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold text-white ${tint.bg}`}>
+      <span className={`absolute -top-2 -left-2 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold text-white shadow-sm ${tint.bg}`}>
         {label}
       </span>
-      <div className="flex flex-wrap items-center justify-center gap-0.5">
-        {Array.from({ length: Math.min(count, 12) }).map((_, i) => (
-          <span
-            key={i}
-            className="size-2 rounded-full sm:size-2.5"
-            style={{ backgroundColor: stoneColor(index, i) }}
-          />
-        ))}
-      </div>
-      <span className="text-[10px] font-bold text-(--color-cocoa)/50">{count}</span>
+      <StoneCluster cellIndex={index} count={displayCount} />
+      {overflow > 0 && (
+        <span className="absolute -bottom-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-(--color-sun-dark) text-[9px] font-extrabold text-white shadow-sm">
+          +{overflow}
+        </span>
+      )}
+      <span className="mt-1 text-[10px] font-bold text-(--color-ink)/50">{count}</span>
     </button>
   );
 }
@@ -952,33 +1184,35 @@ function QuestionModal({
   onAnswer: (choice: number) => void;
 }) {
   const tint = TEAM_TINT[activeTeam];
-  const progress =
-    answerSeconds !== "unlimited" && secondsLeft !== null ? secondsLeft / answerSeconds : 1;
+  const progress = answerSeconds !== "unlimited" && secondsLeft !== null ? secondsLeft / answerSeconds : 1;
+  const ringColorVar = activeTeam === "A" ? "var(--color-mint-dark)" : "var(--color-lavender)";
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-(--color-cocoa)/50 p-4 backdrop-blur-sm">
-      <div className="animate-pop-in w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-(--color-ink)/55 p-4 backdrop-blur-sm">
+      <div className="animate-pop-in w-full max-w-sm rounded-[2rem] bg-white p-6 pt-10 text-center shadow-[0_24px_48px_-16px_rgba(46,42,33,0.5)]">
+        <IconChip
+          icon={activeTeam === "A" ? "🧒" : "👧"}
+          tint={tint.chip}
+          size="md"
+          className="mx-auto -mt-16 mb-3 shadow-[0_6px_14px_-4px_rgba(46,42,33,0.35)]"
+        />
         {answerSeconds !== "unlimited" && (
           <div
-            className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full font-extrabold text-(--color-cocoa)"
-            style={{
-              background: `conic-gradient(var(--color-honey) ${progress * 360}deg, var(--color-honey-light) 0deg)`,
-            }}
+            className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full font-extrabold text-(--color-ink)"
+            style={{ background: `conic-gradient(${ringColorVar} ${progress * 360}deg, var(--color-cloud) 0deg)` }}
           >
-            <span className="flex size-11 items-center justify-center rounded-full bg-white text-sm">
-              {secondsLeft}
-            </span>
+            <span className="flex size-11 items-center justify-center rounded-full bg-white text-sm">{secondsLeft}</span>
           </div>
         )}
         <p className={`text-sm font-bold ${tint.text}`}>Trả lời đúng để được rải quân!</p>
-        <p className="font-display mt-2 text-4xl font-extrabold text-(--color-cocoa)">{question.prompt}</p>
+        <p className="font-display mt-2 text-4xl font-extrabold text-(--color-ink)">{question.prompt}</p>
         <div className="mt-6 grid grid-cols-2 gap-3">
           {question.choices.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => onAnswer(c)}
-              className="rounded-2xl bg-(--color-cream) py-4 text-xl font-extrabold text-(--color-cocoa) transition hover:-translate-y-0.5 hover:bg-(--color-honey-light)"
+              className="min-h-14 rounded-2xl bg-(--color-cloud) py-4 text-xl font-extrabold text-(--color-ink) shadow-[0_3px_0_rgba(46,42,33,0.08),0_6px_14px_-4px_rgba(46,42,33,0.18)] transition hover:-translate-y-0.5 hover:bg-(--color-mint-light) active:translate-y-0.5"
             >
               {c}
             </button>
@@ -1007,16 +1241,22 @@ function FinishedScreen({
   const winnerTeam = winner === "A" ? teamA : winner === "B" ? teamB : null;
 
   return (
-    <div className="animate-pop-in relative mt-4 overflow-hidden rounded-3xl bg-gradient-to-b from-(--color-honey-light) to-white px-6 py-14 text-center">
+    <div className="animate-pop-in relative mt-4 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-(--color-sun)/20 to-white px-6 py-14 text-center sm:rounded-[2.25rem]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <span className="animate-twinkle absolute left-[12%] top-8 text-3xl">🎊</span>
-        <span className="animate-twinkle absolute right-[14%] top-12 text-3xl" style={{ animationDelay: "0.3s" }}>🎉</span>
-        <span className="animate-twinkle absolute left-[20%] bottom-10 text-3xl" style={{ animationDelay: "0.6s" }}>✨</span>
-        <span className="animate-twinkle absolute right-[20%] bottom-14 text-3xl" style={{ animationDelay: "0.9s" }}>🎊</span>
+        <span className="animate-twinkle absolute right-[14%] top-12 text-3xl" style={{ animationDelay: "0.3s" }}>
+          🎉
+        </span>
+        <span className="animate-twinkle absolute left-[20%] bottom-10 text-3xl" style={{ animationDelay: "0.6s" }}>
+          ✨
+        </span>
+        <span className="animate-twinkle absolute right-[20%] bottom-14 text-3xl" style={{ animationDelay: "0.9s" }}>
+          🎊
+        </span>
       </div>
 
-      <span className="relative text-6xl">{winner === "draw" ? "🤝" : "🏆"}</span>
-      <h2 className="font-display relative mt-4 text-3xl font-extrabold text-(--color-cocoa)">
+      <span className="animate-float relative inline-block text-7xl">{winner === "draw" ? "🤝" : "🏆"}</span>
+      <h2 className="font-display relative mt-4 text-3xl font-extrabold text-(--color-ink) sm:text-4xl">
         {winner === "draw" ? "HÒA RỒI!" : `${winnerTeam?.name} CHIẾN THẮNG!`}
       </h2>
 
@@ -1029,13 +1269,13 @@ function FinishedScreen({
         <button
           type="button"
           onClick={onRestart}
-          className="rounded-full bg-(--color-honey) px-8 py-3 text-base font-extrabold text-white transition hover:bg-(--color-honey-dark)"
+          className="min-h-12 rounded-full bg-(--color-sun-dark) px-8 py-3 text-base font-extrabold text-white shadow-[0_5px_0_#92400e,0_12px_24px_-8px_rgba(217,119,6,0.5)] transition hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_#92400e]"
         >
           🔁 Chơi lại
         </button>
         <Link
           href="/mini-game"
-          className="rounded-full border-2 border-(--color-cocoa)/15 px-8 py-3 text-base font-bold text-(--color-cocoa) transition hover:bg-(--color-cream)"
+          className="flex min-h-12 items-center rounded-full border-2 border-(--color-ink)/15 px-8 py-3 text-base font-bold text-(--color-ink) transition hover:bg-(--color-cloud)"
         >
           Về Mini game
         </Link>
@@ -1047,9 +1287,12 @@ function FinishedScreen({
 function ScoreRow({ team, teamId, highlight }: { team: TeamState; teamId: Team; highlight: boolean }) {
   const tint = TEAM_TINT[teamId];
   return (
-    <div className={`flex items-center justify-between rounded-2xl bg-white px-5 py-3 shadow-sm ${highlight ? `ring-2 ${tint.ring}` : ""}`}>
-      <span className={`font-display font-bold ${tint.text}`}>{team.name}</span>
-      <span className="font-extrabold text-(--color-cocoa)">
+    <div className={`flex items-center justify-between rounded-2xl bg-white px-5 py-3 shadow-[0_3px_10px_-3px_rgba(46,42,33,0.18)] ${highlight ? `ring-[3px] ${tint.ring}` : ""}`}>
+      <span className={`flex items-center gap-2 font-display font-bold ${tint.text}`}>
+        {highlight && <span aria-hidden="true">🥇</span>}
+        {team.name}
+      </span>
+      <span className="font-extrabold text-(--color-ink)">
         {team.points} điểm{team.borrowed ? " (đã mượn kho hỗ trợ, -10)" : ""}
       </span>
     </div>

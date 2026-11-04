@@ -58,14 +58,14 @@ export default async function AdventureThemePage({
     <div className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-(--color-cocoa)">
+          <h1 className="font-display text-2xl font-extrabold text-(--color-ink)">
             {theme.emoji} {theme.name}
           </h1>
-          <p className="mt-1 text-sm text-(--color-cocoa)/60">Lớp {classItem.name}</p>
+          <p className="mt-1 text-sm text-(--color-ink)/60">Lớp {classItem.name}</p>
         </div>
         <Link
           href={`/classes/${classId}/games/phieu-luu-tri-thuc`}
-          className="rounded-full border-2 border-(--color-cocoa)/15 px-4 py-2 text-sm font-bold text-(--color-cocoa) hover:bg-white"
+          className="rounded-full border-2 border-(--color-ink)/15 px-4 py-2 text-sm font-bold text-(--color-ink) hover:bg-white"
         >
           Chọn game khác
         </Link>

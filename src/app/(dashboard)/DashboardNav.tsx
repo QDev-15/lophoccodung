@@ -4,17 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Tổng quan", icon: "🏠", tint: "honey" },
-  { href: "/classes", label: "Lớp học", icon: "🧑‍🤝‍🧑", tint: "mint" },
-  { href: "/quizzes", label: "Đề kiểm tra", icon: "📝", tint: "sky" },
-  { href: "/assignments", label: "Bài đã giao", icon: "📨", tint: "lavender" },
-  { href: "/resources", label: "Học liệu", icon: "📚", tint: "peach" },
+  { href: "/dashboard", label: "Tổng quan", icon: "🏠", tint: "mint" },
+  { href: "/classes", label: "Lớp học", icon: "🧑‍🤝‍🧑", tint: "lavender" },
+  { href: "/quizzes", label: "Đề kiểm tra", icon: "📝", tint: "peach" },
+  { href: "/assignments", label: "Bài đã giao", icon: "📨", tint: "mint" },
+  { href: "/resources", label: "Học liệu", icon: "📚", tint: "lavender" },
 ] as const;
 
 const TINT_CLASSES: Record<(typeof NAV_ITEMS)[number]["tint"], string> = {
-  honey: "bg-(--color-honey-light) text-(--color-honey-dark)",
-  mint: "bg-(--color-mint-light) text-(--color-mint)",
-  sky: "bg-(--color-sky-light) text-(--color-sky)",
+  mint: "bg-(--color-mint-light) text-(--color-mint-dark)",
   lavender: "bg-violet-100 text-(--color-lavender)",
   peach: "bg-orange-50 text-(--color-peach)",
 };
@@ -46,8 +44,8 @@ export function DashboardNav({ layout }: { layout: "sidebar" | "mobile" }) {
                 : "shrink-0 flex-col gap-1 px-3 py-1.5 text-center text-[11px]"
             } ${
               active
-                ? "bg-(--color-honey-light) text-(--color-honey-dark)"
-                : "text-(--color-cocoa)/70 hover:bg-(--color-cocoa)/5"
+                ? "bg-(--color-mint-light) text-(--color-mint-dark)"
+                : "text-(--color-ink)/70 hover:bg-(--color-ink)/5"
             }`}
           >
             <span

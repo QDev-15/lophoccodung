@@ -13,7 +13,7 @@ export default function OAnQuanPage() {
     <div className="flex min-h-screen flex-col">
       <PublicHeader />
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 md:px-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-6">
         <OAnQuanGame />
       </main>
 

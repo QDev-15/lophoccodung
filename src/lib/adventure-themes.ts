@@ -1,4 +1,4 @@
-export type Tint = "honey" | "mint" | "sky" | "lavender";
+export type Tint = "mint" | "lavender" | "peach";
 
 export type AdventureTheme = {
   slug: string;
@@ -30,7 +30,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🧒",
     stepIcon: "⬜",
     finishIcon: "🏁",
-    tint: "honey",
+    tint: "lavender",
   },
   {
     slug: "khinh-khi-cau",
@@ -40,7 +40,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🎈",
     stepIcon: "☁️",
     finishIcon: "🌈",
-    tint: "sky",
+    tint: "peach",
   },
   {
     slug: "vuon-hoa-diem-thuong",
@@ -50,7 +50,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🐝",
     stepIcon: "🌱",
     finishIcon: "💐",
-    tint: "lavender",
+    tint: "mint",
   },
   {
     slug: "du-hanh-vu-tru",
@@ -70,7 +70,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🧗",
     stepIcon: "🪨",
     finishIcon: "🏔️",
-    tint: "honey",
+    tint: "peach",
   },
   {
     slug: "chuyen-tau-tri-thuc",
@@ -80,7 +80,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🚂",
     stepIcon: "🚉",
     finishIcon: "🎉",
-    tint: "sky",
+    tint: "mint",
   },
   {
     slug: "dao-kho-bau",
@@ -90,7 +90,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🏴‍☠️",
     stepIcon: "🌴",
     finishIcon: "💰",
-    tint: "honey",
+    tint: "lavender",
   },
   {
     slug: "buom-tim-hoa",
@@ -100,7 +100,7 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     mascot: "🦋",
     stepIcon: "🌼",
     finishIcon: "🌺",
-    tint: "mint",
+    tint: "peach",
   },
 ];
 

@@ -30,8 +30,8 @@ export function QuestionReveal({
               key={opt.id}
               className={`rounded-xl border-2 px-4 py-2 text-sm font-medium ${
                 isCorrect
-                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-cocoa)"
-                  : "border-(--color-cocoa)/10 text-(--color-cocoa)/80"
+                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-ink)"
+                  : "border-(--color-ink)/10 text-(--color-ink)/80"
               }`}
             >
               {opt.text} {isCorrect && "✓"}
@@ -53,8 +53,8 @@ export function QuestionReveal({
               key={String(val)}
               className={`flex-1 rounded-xl border-2 px-4 py-2 text-center text-sm font-bold ${
                 isCorrect
-                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-cocoa)"
-                  : "border-(--color-cocoa)/10 text-(--color-cocoa)/80"
+                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-ink)"
+                  : "border-(--color-ink)/10 text-(--color-ink)/80"
               }`}
             >
               {val ? "Đúng" : "Sai"} {isCorrect && "✓"}
@@ -68,11 +68,11 @@ export function QuestionReveal({
   return (
     <div className="mt-4">
       {revealed ? (
-        <p className="rounded-xl border-2 border-(--color-mint) bg-(--color-mint-light) px-4 py-2 text-sm font-bold text-(--color-cocoa)">
+        <p className="rounded-xl border-2 border-(--color-mint) bg-(--color-mint-light) px-4 py-2 text-sm font-bold text-(--color-ink)">
           Đáp án: {formatCorrectAnswer({ type: question.type as QuestionType, data: question.data })}
         </p>
       ) : (
-        <p className="text-sm text-(--color-cocoa)/50">Câu điền từ — bấm &quot;Hiện đáp án&quot; để xem.</p>
+        <p className="text-sm text-(--color-ink)/50">Câu điền từ — bấm &quot;Hiện đáp án&quot; để xem.</p>
       )}
     </div>
   );

@@ -1,8 +1,7 @@
 const TINT_STYLES = {
-  honey: "bg-(--color-honey-light) text-(--color-honey-dark)",
-  mint: "bg-(--color-mint-light) text-(--color-mint)",
-  sky: "bg-(--color-sky-light) text-(--color-sky)",
+  mint: "bg-(--color-mint-light) text-(--color-mint-dark)",
   lavender: "bg-violet-100 text-(--color-lavender)",
+  peach: "bg-orange-50 text-(--color-peach)",
 } as const;
 
 const SIZE_STYLES = {
@@ -11,11 +10,11 @@ const SIZE_STYLES = {
   lg: "size-16 text-3xl",
 } as const;
 
-export const TINT_ROTATION = ["honey", "mint", "sky", "lavender"] as const;
+export const TINT_ROTATION = ["mint", "lavender", "peach"] as const;
 
 export function IconChip({
   icon,
-  tint = "honey",
+  tint = "mint",
   size = "md",
   className = "",
 }: {

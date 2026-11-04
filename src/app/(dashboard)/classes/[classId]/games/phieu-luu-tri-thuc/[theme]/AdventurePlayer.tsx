@@ -33,7 +33,7 @@ export function AdventurePlayer({
   return (
     <div className="flex flex-col gap-6">
       {/* Path board */}
-      <div className="flex flex-wrap items-center justify-center gap-2 rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]">
+      <div className="flex flex-wrap items-center justify-center gap-2 rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]">
         {quiz.questions.map((_, i) => (
           <div key={i} className="relative flex size-11 items-center justify-center rounded-full text-xl">
             <span
@@ -41,8 +41,8 @@ export function AdventurePlayer({
                 i < index
                   ? "bg-(--color-mint-light)"
                   : i === index
-                    ? "bg-(--color-honey-light)"
-                    : "bg-(--color-cream)"
+                    ? "bg-(--color-mint-light)"
+                    : "bg-(--color-cloud)"
               }`}
             />
             <span className="relative">
@@ -51,34 +51,34 @@ export function AdventurePlayer({
           </div>
         ))}
         <div className="relative flex size-11 items-center justify-center rounded-full text-xl">
-          <span className={`absolute inset-0 rounded-full ${finished ? "bg-(--color-honey-light)" : "bg-(--color-cream)"}`} />
+          <span className={`absolute inset-0 rounded-full ${finished ? "bg-(--color-mint-light)" : "bg-(--color-cloud)"}`} />
           <span className="relative">{finished ? theme.mascot : theme.finishIcon}</span>
         </div>
       </div>
 
       {finished ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-8 text-center shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]">
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-8 text-center shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]">
           <span className="text-5xl">{theme.finishIcon}</span>
-          <h2 className="font-display text-xl font-extrabold text-(--color-cocoa)">
+          <h2 className="font-display text-xl font-extrabold text-(--color-ink)">
             Hoàn thành hành trình!
           </h2>
-          <p className="text-sm text-(--color-cocoa)/60">
+          <p className="text-sm text-(--color-ink)/60">
             Cả lớp đã trả lời xong {total} câu hỏi trong &quot;{quiz.title}&quot;.
           </p>
           <button
             onClick={handleRestart}
-            className="mt-2 rounded-full bg-(--color-honey) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-honey-dark)"
+            className="mt-2 rounded-full bg-(--color-mint) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-mint-dark)"
           >
             Chơi lại
           </button>
         </div>
       ) : (
         question && (
-          <div className="rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]">
-            <p className="text-xs font-bold text-(--color-cocoa)/40">
+          <div className="rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]">
+            <p className="text-xs font-bold text-(--color-ink)/40">
               Câu {index + 1}/{total}
             </p>
-            <p className="mt-2 font-display text-lg font-bold text-(--color-cocoa)">
+            <p className="mt-2 font-display text-lg font-bold text-(--color-ink)">
               {question.prompt}
             </p>
 
@@ -88,14 +88,14 @@ export function AdventurePlayer({
               {!revealed ? (
                 <button
                   onClick={() => setRevealed(true)}
-                  className="rounded-full bg-(--color-cocoa)/10 px-6 py-2.5 text-sm font-bold text-(--color-cocoa) hover:bg-(--color-cocoa)/15"
+                  className="rounded-full bg-(--color-ink)/10 px-6 py-2.5 text-sm font-bold text-(--color-ink) hover:bg-(--color-ink)/15"
                 >
                   Hiện đáp án
                 </button>
               ) : (
                 <button
                   onClick={handleNext}
-                  className="rounded-full bg-(--color-honey) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-honey-dark)"
+                  className="rounded-full bg-(--color-mint) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-mint-dark)"
                 >
                   {index + 1 === total ? "Về đích →" : "Câu tiếp theo →"}
                 </button>

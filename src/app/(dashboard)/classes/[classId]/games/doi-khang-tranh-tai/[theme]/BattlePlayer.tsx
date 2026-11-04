@@ -50,43 +50,43 @@ export function BattlePlayer({
     <div className="flex flex-col gap-6">
       {/* Scoreboard */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col items-center gap-1 rounded-3xl bg-(--color-honey-light) p-5">
-          <span className="text-sm font-bold text-(--color-honey-dark)">🟠 Đội A</span>
-          <span className="font-display text-4xl font-extrabold text-(--color-honey-dark)">{scoreA}</span>
+        <div className="flex flex-col items-center gap-1 rounded-3xl bg-(--color-mint-light) p-5">
+          <span className="text-sm font-bold text-(--color-mint)">🟢 Đội A</span>
+          <span className="font-display text-4xl font-extrabold text-(--color-mint)">{scoreA}</span>
         </div>
-        <div className="flex flex-col items-center gap-1 rounded-3xl bg-(--color-sky-light) p-5">
-          <span className="text-sm font-bold text-(--color-sky)">🔵 Đội B</span>
-          <span className="font-display text-4xl font-extrabold text-(--color-sky)">{scoreB}</span>
+        <div className="flex flex-col items-center gap-1 rounded-3xl bg-(--color-mint-light) p-5">
+          <span className="text-sm font-bold text-(--color-mint-dark)">🔵 Đội B</span>
+          <span className="font-display text-4xl font-extrabold text-(--color-mint-dark)">{scoreB}</span>
         </div>
       </div>
 
       {finished ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-8 text-center shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]">
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-8 text-center shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]">
           <span className="text-5xl">{theme.emoji}</span>
-          <h2 className="font-display text-xl font-extrabold text-(--color-cocoa)">
+          <h2 className="font-display text-xl font-extrabold text-(--color-ink)">
             {winner === null
               ? "Hai đội hòa nhau!"
               : winner === "A"
                 ? "🏆 Đội A chiến thắng!"
                 : "🏆 Đội B chiến thắng!"}
           </h2>
-          <p className="text-sm text-(--color-cocoa)/60">
+          <p className="text-sm text-(--color-ink)/60">
             Tỉ số cuối: {scoreA} - {scoreB}
           </p>
           <button
             onClick={handleRestart}
-            className="mt-2 rounded-full bg-(--color-honey) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-honey-dark)"
+            className="mt-2 rounded-full bg-(--color-mint) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-mint-dark)"
           >
             Chơi lại
           </button>
         </div>
       ) : (
         question && (
-          <div className="rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]">
-            <p className="text-xs font-bold text-(--color-cocoa)/40">
+          <div className="rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]">
+            <p className="text-xs font-bold text-(--color-ink)/40">
               Câu {index + 1}/{total}
             </p>
-            <p className="mt-2 font-display text-lg font-bold text-(--color-cocoa)">
+            <p className="mt-2 font-display text-lg font-bold text-(--color-ink)">
               {question.prompt}
             </p>
 
@@ -96,7 +96,7 @@ export function BattlePlayer({
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setRevealed(true)}
-                  className="rounded-full bg-(--color-cocoa)/10 px-6 py-2.5 text-sm font-bold text-(--color-cocoa) hover:bg-(--color-cocoa)/15"
+                  className="rounded-full bg-(--color-ink)/10 px-6 py-2.5 text-sm font-bold text-(--color-ink) hover:bg-(--color-ink)/15"
                 >
                   Hiện đáp án
                 </button>
@@ -105,19 +105,19 @@ export function BattlePlayer({
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button
                   onClick={() => award("A")}
-                  className="rounded-full bg-(--color-honey) px-5 py-2.5 text-sm font-bold text-white hover:bg-(--color-honey-dark)"
+                  className="rounded-full bg-(--color-mint) px-5 py-2.5 text-sm font-bold text-white hover:bg-(--color-mint-dark)"
                 >
                   +1 Đội A
                 </button>
                 <button
                   onClick={() => award("tie")}
-                  className="rounded-full bg-(--color-cocoa)/10 px-5 py-2.5 text-sm font-bold text-(--color-cocoa) hover:bg-(--color-cocoa)/15"
+                  className="rounded-full bg-(--color-ink)/10 px-5 py-2.5 text-sm font-bold text-(--color-ink) hover:bg-(--color-ink)/15"
                 >
                   Không ai đúng
                 </button>
                 <button
                   onClick={() => award("B")}
-                  className="rounded-full bg-(--color-sky) px-5 py-2.5 text-sm font-bold text-white hover:opacity-90"
+                  className="rounded-full bg-(--color-mint) px-5 py-2.5 text-sm font-bold text-white hover:opacity-90"
                 >
                   +1 Đội B
                 </button>
@@ -126,7 +126,7 @@ export function BattlePlayer({
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleNext}
-                  className="rounded-full bg-(--color-honey) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-honey-dark)"
+                  className="rounded-full bg-(--color-mint) px-6 py-2.5 text-sm font-bold text-white hover:bg-(--color-mint-dark)"
                 >
                   {index + 1 === total ? "Xem kết quả →" : "Câu tiếp theo →"}
                 </button>

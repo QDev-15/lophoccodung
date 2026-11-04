@@ -13,7 +13,7 @@ type Plan = {
   name: string;
   icon: string;
   price: string;
-  badge?: { label: string; tone: "honey" | "lavender" };
+  badge?: { label: string; tone: "mint" | "lavender" };
   limits: { label: string; value: string }[];
   features: string[];
 };
@@ -40,7 +40,7 @@ const PLANS: Plan[] = [
     name: "Pro",
     icon: "🌻",
     price: "Liên hệ",
-    badge: { label: "🔥 Phổ biến", tone: "honey" },
+    badge: { label: "🔥 Phổ biến", tone: "mint" },
     limits: [
       { label: "Lớp học", value: "5" },
       { label: "Bộ đề", value: "10" },
@@ -81,7 +81,7 @@ const PLANS: Plan[] = [
 ];
 
 const BADGE_CLASSES = {
-  honey: "bg-(--color-honey) text-white",
+  mint: "bg-(--color-mint) text-white",
   lavender: "bg-(--color-lavender) text-white",
 };
 
@@ -92,8 +92,8 @@ export default function PricingPage() {
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:px-6">
         <div className="text-center">
-          <h1 className="font-display text-3xl font-extrabold text-(--color-cocoa)">Bảng giá</h1>
-          <p className="mx-auto mt-2 max-w-lg text-(--color-cocoa)/65">
+          <h1 className="font-display text-3xl font-extrabold text-(--color-ink)">Bảng giá</h1>
+          <p className="mx-auto mt-2 max-w-lg text-(--color-ink)/65">
             Dùng miễn phí ở gói Cơ bản. Cần nâng cấp? Liên hệ trực tiếp, không cần thẻ thanh toán.
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function PricingPage() {
           {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)] ${
+              className={`relative flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)] ${
                 plan.badge?.tone === "lavender" ? "ring-2 ring-(--color-lavender)" : ""
               }`}
             >
@@ -114,23 +114,23 @@ export default function PricingPage() {
                 </span>
               )}
 
-              <IconChip icon={plan.icon} tint={plan.badge?.tone === "lavender" ? "lavender" : "honey"} size="lg" />
+              <IconChip icon={plan.icon} tint={plan.badge?.tone === "lavender" ? "lavender" : "mint"} size="lg" />
 
               <div>
-                <h2 className="font-display text-lg font-bold text-(--color-cocoa)">{plan.name}</h2>
-                <p className="mt-1 text-2xl font-extrabold text-(--color-honey-dark)">{plan.price}</p>
+                <h2 className="font-display text-lg font-bold text-(--color-ink)">{plan.name}</h2>
+                <p className="mt-1 text-2xl font-extrabold text-(--color-mint-dark)">{plan.price}</p>
               </div>
 
-              <ul className="flex flex-col gap-1 text-sm text-(--color-cocoa)/70">
+              <ul className="flex flex-col gap-1 text-sm text-(--color-ink)/70">
                 {plan.limits.map((l) => (
                   <li key={l.label} className="flex justify-between">
                     <span>{l.label}</span>
-                    <span className="font-bold text-(--color-cocoa)">{l.value}</span>
+                    <span className="font-bold text-(--color-ink)">{l.value}</span>
                   </li>
                 ))}
               </ul>
 
-              <ul className="flex flex-1 flex-col gap-2 text-sm text-(--color-cocoa)/70">
+              <ul className="flex flex-1 flex-col gap-2 text-sm text-(--color-ink)/70">
                 {plan.features.map((f) => (
                   <li key={f} className="flex gap-2">
                     <span className="text-(--color-mint)">✓</span>
@@ -143,8 +143,8 @@ export default function PricingPage() {
                 href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`Nâng cấp gói ${plan.name}`)}`}
                 className={`mt-auto rounded-full px-5 py-2.5 text-center text-sm font-bold transition ${
                   plan.price === "Miễn phí"
-                    ? "bg-(--color-honey) text-white hover:bg-(--color-honey-dark)"
-                    : "border-2 border-(--color-cocoa)/15 text-(--color-cocoa) hover:bg-(--color-cream)"
+                    ? "bg-(--color-mint) text-white hover:bg-(--color-mint-dark)"
+                    : "border-2 border-(--color-ink)/15 text-(--color-ink) hover:bg-(--color-cloud)"
                 }`}
               >
                 {plan.price === "Miễn phí" ? "Bắt đầu dùng" : "Liên hệ nâng cấp"}
@@ -153,11 +153,11 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div className="mt-10 rounded-3xl bg-(--color-honey-light) p-6 text-sm text-(--color-cocoa)/80">
-          <p className="font-display font-bold text-(--color-cocoa)">Cách nâng cấp</p>
+        <div className="mt-10 rounded-3xl bg-(--color-mint-light) p-6 text-sm text-(--color-ink)/80">
+          <p className="font-display font-bold text-(--color-ink)">Cách nâng cấp</p>
           <p className="mt-1">
             Gửi email tới{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="font-bold text-(--color-honey-dark) hover:underline">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="font-bold text-(--color-mint-dark) hover:underline">
               {SUPPORT_EMAIL}
             </a>{" "}
             kèm email đăng nhập và gói bạn muốn nâng cấp. Giới hạn mới sẽ áp dụng ngay khi được

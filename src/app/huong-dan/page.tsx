@@ -164,10 +164,10 @@ export default function GuidePage() {
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-12 md:px-6">
         <div className="text-center">
-          <h1 className="font-display text-3xl font-extrabold text-(--color-cocoa)">
+          <h1 className="font-display text-3xl font-extrabold text-(--color-ink)">
             Hướng dẫn sử dụng
           </h1>
-          <p className="mt-1 text-(--color-cocoa)/65">Từng bước ngắn gọn cho từng tính năng.</p>
+          <p className="mt-1 text-(--color-ink)/65">Từng bước ngắn gọn cho từng tính năng.</p>
         </div>
 
         <nav className="mt-6 flex flex-wrap justify-center gap-2">
@@ -177,11 +177,10 @@ export default function GuidePage() {
               href={`#${g.id}`}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${
                 [
-                  "bg-(--color-honey-light) text-(--color-honey-dark)",
-                  "bg-(--color-mint-light) text-(--color-mint)",
-                  "bg-(--color-sky-light) text-(--color-sky)",
+                  "bg-(--color-mint-light) text-(--color-mint-dark)",
                   "bg-violet-100 text-(--color-lavender)",
-                ][i % 4]
+                  "bg-orange-50 text-(--color-peach)",
+                ][i % 3]
               }`}
             >
               <span>{g.icon}</span>
@@ -194,20 +193,20 @@ export default function GuidePage() {
           {GROUPS.map((g) => (
             <section key={g.id} id={g.id} className="scroll-mt-20">
               <div className="flex items-center gap-3">
-                <IconChip icon={g.icon} tint="honey" size="md" />
-                <h2 className="font-display text-xl font-bold text-(--color-cocoa)">{g.title}</h2>
+                <IconChip icon={g.icon} tint="mint" size="md" />
+                <h2 className="font-display text-xl font-bold text-(--color-ink)">{g.title}</h2>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                 {g.guides.map((guide) => (
                   <div
                     key={guide.title}
-                    className="rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)]"
+                    className="rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)]"
                   >
-                    <h3 className="font-display font-bold text-(--color-cocoa)">{guide.title}</h3>
+                    <h3 className="font-display font-bold text-(--color-ink)">{guide.title}</h3>
                     <ol className="mt-3 flex flex-col gap-2">
                       {guide.steps.map((step, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-(--color-cocoa)/75">
-                          <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-(--color-honey) text-[11px] font-bold text-white">
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-(--color-ink)/75">
+                          <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-(--color-mint) text-[11px] font-bold text-white">
                             {i + 1}
                           </span>
                           {step}

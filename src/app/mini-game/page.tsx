@@ -30,7 +30,7 @@ function CategorySection({
   return (
     <section id={id} className="scroll-mt-20 py-10">
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <h2 className="font-display text-2xl font-extrabold text-(--color-cocoa)">
+        <h2 className="font-display text-2xl font-extrabold text-(--color-ink)">
           {emoji} {title}
         </h2>
         {badge && (
@@ -39,7 +39,7 @@ function CategorySection({
           </span>
         )}
       </div>
-      <p className="mx-auto mt-2 max-w-xl text-center text-(--color-cocoa)/65">{description}</p>
+      <p className="mx-auto mt-2 max-w-xl text-center text-(--color-ink)/65">{description}</p>
       <div className="mt-6">{children}</div>
     </section>
   );
@@ -61,10 +61,10 @@ export default function MiniGamePage() {
 
       <main className="flex-1">
         <section className="px-4 pb-4 pt-12 text-center md:px-6">
-          <h1 className="font-display text-3xl font-extrabold text-(--color-cocoa) sm:text-4xl">
+          <h1 className="font-display text-3xl font-extrabold text-(--color-ink) sm:text-4xl">
             🎲 Mini game cho lớp học
           </h1>
-          <p className="mx-auto mt-2 max-w-xl text-(--color-cocoa)/65">
+          <p className="mx-auto mt-2 max-w-xl text-(--color-ink)/65">
             Đăng nhập, chọn một lớp học và một kiểu chơi để bắt đầu — mọi game đều dùng chính danh
             sách lớp hoặc đề kiểm tra của bạn.
           </p>
@@ -73,7 +73,7 @@ export default function MiniGamePage() {
               <a
                 key={c.id}
                 href={`#${c.id}`}
-                className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-(--color-cocoa)/70 hover:bg-(--color-honey-light) hover:text-(--color-honey-dark)"
+                className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-(--color-ink)/70 hover:bg-(--color-mint-light) hover:text-(--color-mint-dark)"
               >
                 {c.label}
               </a>
@@ -91,7 +91,7 @@ export default function MiniGamePage() {
           >
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
               {RANDOM_PICKER_GAMES.map((g, i) => (
-                <GameCard key={g.slug} emoji={g.emoji} name={g.name} tint={TINTS[i % 4]} />
+                <GameCard key={g.slug} emoji={g.emoji} name={g.name} tint={TINTS[i % TINTS.length]} />
               ))}
             </div>
           </CategorySection>
@@ -134,10 +134,10 @@ export default function MiniGamePage() {
             <div className="flex justify-center">
               <Link
                 href="/mini-game/o-an-quan"
-                className="flex w-48 flex-col items-center gap-2 rounded-3xl bg-white p-5 text-center shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)] transition hover:-translate-y-1"
+                className="flex w-48 flex-col items-center gap-2 rounded-3xl bg-white p-5 text-center shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)] transition hover:-translate-y-1"
               >
-                <IconChip icon="🟤" tint="honey" size="lg" />
-                <span className="font-bold text-(--color-cocoa)">Ô ăn quan</span>
+                <IconChip icon="🟤" tint="peach" size="lg" />
+                <span className="font-bold text-(--color-ink)">Ô ăn quan</span>
               </Link>
             </div>
           </CategorySection>
@@ -152,10 +152,10 @@ export default function MiniGamePage() {
             <div className="flex justify-center">
               <Link
                 href="/mini-game/hen-gio"
-                className="flex w-48 flex-col items-center gap-2 rounded-3xl bg-white p-5 text-center shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)] transition hover:-translate-y-1"
+                className="flex w-48 flex-col items-center gap-2 rounded-3xl bg-white p-5 text-center shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)] transition hover:-translate-y-1"
               >
-                <IconChip icon="⏰" tint="honey" size="lg" />
-                <span className="font-bold text-(--color-cocoa)">Hẹn giờ lớp học</span>
+                <IconChip icon="⏰" tint="mint" size="lg" />
+                <span className="font-bold text-(--color-ink)">Hẹn giờ lớp học</span>
               </Link>
             </div>
           </CategorySection>
@@ -176,7 +176,7 @@ export default function MiniGamePage() {
         <section className="px-4 py-14 text-center md:px-6">
           <Link
             href="/signin"
-            className="inline-block rounded-full bg-(--color-honey) px-8 py-3 text-base font-bold text-white transition hover:bg-(--color-honey-dark)"
+            className="inline-block rounded-full bg-(--color-mint) px-8 py-3 text-base font-bold text-white transition hover:bg-(--color-mint-dark)"
           >
             Đăng nhập để chơi cùng lớp của bạn →
           </Link>
@@ -188,7 +188,7 @@ export default function MiniGamePage() {
   );
 }
 
-const TINTS = ["honey", "mint", "sky", "lavender"] as const;
+const TINTS = ["mint", "lavender", "peach"] as const;
 
 function GameCard({
   emoji,
@@ -202,17 +202,17 @@ function GameCard({
   return (
     <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center transition hover:-translate-y-1">
       <IconChip icon={emoji} tint={tint} size="md" />
-      <span className="text-sm font-bold text-(--color-cocoa)">{name}</span>
+      <span className="text-sm font-bold text-(--color-ink)">{name}</span>
     </div>
   );
 }
 
 function ComingSoonCard({ emoji, name }: { emoji: string; name: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl bg-(--color-cream) p-5 text-center opacity-70">
+    <div className="flex flex-col items-center gap-2 rounded-2xl bg-(--color-cloud) p-5 text-center opacity-70">
       <span className="text-3xl grayscale">{emoji}</span>
-      <span className="text-sm font-bold text-(--color-cocoa)/60">{name}</span>
-      <span className="rounded-full bg-(--color-cocoa)/10 px-2 py-0.5 text-[10px] font-bold text-(--color-cocoa)/50">
+      <span className="text-sm font-bold text-(--color-ink)/60">{name}</span>
+      <span className="rounded-full bg-(--color-ink)/10 px-2 py-0.5 text-[10px] font-bold text-(--color-ink)/50">
         Sắp ra mắt
       </span>
     </div>

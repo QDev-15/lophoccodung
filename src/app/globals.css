@@ -1,21 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff9f2;
-  --foreground: #3e281b;
+  --background: #fffaf0;
+  --foreground: #2e2a21;
 
-  --color-honey: #f99c00;
-  --color-honey-dark: #ea580c;
-  --color-honey-light: #ffedd5;
+  --color-mint: #22c55e;
+  --color-mint-dark: #15803d;
+  --color-mint-light: #dcfce7;
   --color-peach: #f8b793;
-  --color-mint: #00bb7f;
-  --color-mint-light: #eefaf1;
-  --color-sky: #1565c0;
-  --color-sky-light: #e8ecff;
   --color-lavender: #8b5cf6;
   --color-bloom: #ad1457;
-  --color-cream: #fff9f2;
-  --color-cocoa: #3e281b;
+  --color-sun: #fbbf24;
+  --color-sun-dark: #d97706;
+  --color-cloud: #fffaf0;
+  --color-white: #ffffff;
+  --color-ink: #2e2a21;
 
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -26,18 +25,17 @@
   --font-sans: var(--font-nunito);
   --font-display: var(--font-baloo);
 
-  --color-honey: var(--color-honey);
-  --color-honey-dark: var(--color-honey-dark);
-  --color-honey-light: var(--color-honey-light);
-  --color-peach: var(--color-peach);
   --color-mint: var(--color-mint);
+  --color-mint-dark: var(--color-mint-dark);
   --color-mint-light: var(--color-mint-light);
-  --color-sky: var(--color-sky);
-  --color-sky-light: var(--color-sky-light);
+  --color-peach: var(--color-peach);
   --color-lavender: var(--color-lavender);
   --color-bloom: var(--color-bloom);
-  --color-cream: var(--color-cream);
-  --color-cocoa: var(--color-cocoa);
+  --color-sun: var(--color-sun);
+  --color-sun-dark: var(--color-sun-dark);
+  --color-cloud: var(--color-cloud);
+  --color-white: var(--color-white);
+  --color-ink: var(--color-ink);
 
   --ease-bounce: var(--ease-bounce);
 }
@@ -155,12 +153,12 @@ body {
 @keyframes glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
+    box-shadow: 0 0 0 0 rgba(21,128,61, 0);
   }
   50% {
     box-shadow:
-      0 0 0 6px rgba(234, 88, 12, 0.22),
-      0 8px 20px rgba(234, 88, 12, 0.35);
+      0 0 0 6px rgba(21,128,61, 0.22),
+      0 8px 20px rgba(21,128,61, 0.3);
   }
 }
 .animate-glow {
@@ -193,6 +191,55 @@ body {
   animation: gradient-pan 6s ease-in-out infinite;
 }
 
+/* Gentle continuous sway for hanging decorative elements (banners, bamboo leaves). */
+@keyframes leaf-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+.animate-leaf-sway {
+  transform-origin: top center;
+  animation: leaf-sway 4s ease-in-out infinite;
+}
+
+@keyframes banner-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+.animate-banner-sway {
+  transform-origin: top center;
+  animation: banner-sway 6s ease-in-out infinite;
+}
+
+/* Static CSS wood-grain texture overlay (no illustration assets in this codebase —
+   board/signpost textures are simulated with layered gradients). */
+.bg-wood-grain {
+  background-image:
+    repeating-linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.1) 0px,
+      rgba(255, 255, 255, 0.1) 2px,
+      transparent 2px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      100deg,
+      rgba(0, 0, 0, 0.08) 0px,
+      rgba(0, 0, 0, 0.08) 1px,
+      transparent 1px,
+      transparent 13px
+    );
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-wiggle,
@@ -201,6 +248,8 @@ body {
   .animate-glow,
   .animate-shine,
   .animate-gradient-pan,
+  .animate-leaf-sway,
+  .animate-banner-sway,
   .animate-chest-shake,
   .animate-cup-shuffle {
     animation-duration: 0.001ms !important;

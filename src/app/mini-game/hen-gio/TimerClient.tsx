@@ -62,14 +62,14 @@ export function TimerClient() {
         style={{
           boxShadow: isDone
             ? undefined
-            : "0 8px 32px -8px rgba(62,40,27,0.18)",
+            : "0 8px 32px -8px rgba(46,42,33,0.18)",
           background: isDone
             ? undefined
-            : `conic-gradient(var(--color-honey) ${progress * 360}deg, var(--color-honey-light) 0deg)`,
+            : `conic-gradient(var(--color-mint) ${progress * 360}deg, var(--color-mint-light) 0deg)`,
         }}
       >
         <div className="flex size-52 flex-col items-center justify-center rounded-full bg-white">
-          <span className={`font-display text-5xl font-extrabold ${isDone ? "text-(--color-bloom)" : "text-(--color-cocoa)"}`}>
+          <span className={`font-display text-5xl font-extrabold ${isDone ? "text-(--color-bloom)" : "text-(--color-ink)"}`}>
             {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
           </span>
           {isDone && <span className="mt-2 text-sm font-bold text-(--color-bloom)">Hết giờ! ⏰</span>}
@@ -83,8 +83,8 @@ export function TimerClient() {
             onClick={() => setPreset(m)}
             className={`rounded-full px-4 py-2 text-sm font-bold transition ${
               totalSeconds === m * 60
-                ? "bg-(--color-honey) text-white"
-                : "bg-white text-(--color-cocoa) hover:bg-(--color-honey-light)"
+                ? "bg-(--color-mint) text-white"
+                : "bg-white text-(--color-ink) hover:bg-(--color-mint-light)"
             }`}
           >
             {m} phút
@@ -98,11 +98,11 @@ export function TimerClient() {
             value={customMinutes}
             onChange={(e) => setCustomMinutes(e.target.value)}
             placeholder="Số phút"
-            className="w-20 rounded-full px-2 py-1 text-sm text-(--color-cocoa) focus:outline-none"
+            className="w-20 rounded-full px-2 py-1 text-sm text-(--color-ink) focus:outline-none"
           />
           <button
             onClick={applyCustom}
-            className="rounded-full bg-(--color-cocoa)/10 px-3 py-1.5 text-sm font-bold text-(--color-cocoa) hover:bg-(--color-cocoa)/15"
+            className="rounded-full bg-(--color-ink)/10 px-3 py-1.5 text-sm font-bold text-(--color-ink) hover:bg-(--color-ink)/15"
           >
             Đặt
           </button>
@@ -113,13 +113,13 @@ export function TimerClient() {
         <button
           onClick={toggleRunning}
           disabled={secondsLeft === 0}
-          className="rounded-full bg-(--color-honey) px-8 py-3 text-base font-bold text-white transition hover:bg-(--color-honey-dark) disabled:opacity-50"
+          className="rounded-full bg-(--color-mint) px-8 py-3 text-base font-bold text-white transition hover:bg-(--color-mint-dark) disabled:opacity-50"
         >
           {running ? "Tạm dừng" : "Bắt đầu"}
         </button>
         <button
           onClick={reset}
-          className="rounded-full border-2 border-(--color-cocoa)/15 px-8 py-3 text-base font-bold text-(--color-cocoa) hover:bg-white"
+          className="rounded-full border-2 border-(--color-ink)/15 px-8 py-3 text-base font-bold text-(--color-ink) hover:bg-white"
         >
           Đặt lại
         </button>

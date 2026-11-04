@@ -39,7 +39,7 @@ export default async function ClassDetailPage({
             href={`/classes/${classId}/games`}
             className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
           >
-            🎲 Gọi tên ngẫu nhiên
+            🎲 Mini-game
           </Link>
           <Link
             href={`/classes/${classId}/import`}

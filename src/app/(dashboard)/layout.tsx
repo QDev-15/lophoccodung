@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { auth, signOut } from "@/lib/auth";
+import { DashboardNav } from "./DashboardNav";
 
 export default async function DashboardLayout({
   children,
@@ -14,28 +15,66 @@ export default async function DashboardLayout({
     redirect("/signin");
   }
 
+  const name = session.user.name ?? "Thầy cô";
+  const initial = name.trim().charAt(0).toUpperCase();
+
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center gap-6 border-b border-zinc-200 px-6 py-4">
-        <Link href="/dashboard" className="font-bold text-sky-700">
-          Lớp Học Có Dũng
+      <header className="flex items-center justify-between border-b border-(--color-cocoa)/10 bg-white px-4 py-3 md:px-6">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 font-display text-lg font-extrabold text-(--color-cocoa)"
+        >
+          <span className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-violet-400 to-pink-400 text-lg">
+            🧸
+          </span>
+          Lớp Học Cô Dung
         </Link>
-        <nav className="flex gap-4 text-sm text-zinc-600">
-          <Link href="/dashboard" className="hover:text-sky-700">
-            Tổng quan
-          </Link>
-          <Link href="/classes" className="hover:text-sky-700">
-            Lớp học
-          </Link>
-          <Link href="/quizzes" className="hover:text-sky-700">
-            Đề kiểm tra
-          </Link>
-          <Link href="/assignments" className="hover:text-sky-700">
-            Bài đã giao
-          </Link>
-        </nav>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-2 sm:flex">
+            {session.user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={session.user.image}
+                alt=""
+                className="size-8 rounded-full"
+              />
+            ) : (
+              <span className="flex size-8 items-center justify-center rounded-full bg-(--color-honey-light) text-sm font-bold text-(--color-honey-dark)">
+                {initial}
+              </span>
+            )}
+            <span className="text-sm font-semibold text-(--color-cocoa)">
+              {name}
+            </span>
+          </div>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button
+              type="submit"
+              className="rounded-full border border-(--color-cocoa)/15 px-4 py-1.5 text-sm font-bold text-(--color-cocoa)/80 transition hover:bg-(--color-cocoa)/5"
+            >
+              Đăng xuất
+            </button>
+          </form>
+        </div>
       </header>
-      <main className="flex-1">{children}</main>
+
+      <div className="border-b border-(--color-cocoa)/10 bg-white md:hidden">
+        <DashboardNav layout="mobile" />
+      </div>
+
+      <div className="flex flex-1">
+        <aside className="hidden w-64 shrink-0 border-r border-(--color-cocoa)/10 bg-white md:block">
+          <DashboardNav layout="sidebar" />
+        </aside>
+        <main className="flex-1 bg-(--color-cream)">{children}</main>
+      </div>
     </div>
   );
 }

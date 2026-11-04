@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/require-teacher";
-import { RANDOM_PICKER_GAMES } from "@/lib/games";
 
 export default async function ClassGamesPage({
   params,
@@ -22,33 +21,70 @@ export default async function ClassGamesPage({
     notFound();
   }
 
+  const categories = [
+    {
+      href: `/classes/${classId}/games/goi-len-bang`,
+      emoji: "🎯",
+      title: "Gọi lên bảng",
+      description: "10 kiểu gọi tên ngẫu nhiên từ danh sách lớp.",
+    },
+    {
+      href: `/classes/${classId}/games/phieu-luu-tri-thuc`,
+      emoji: "🗺️",
+      title: "Phiêu lưu tri thức",
+      description: "9 hành trình trả lời câu hỏi theo đề kiểm tra của bạn.",
+    },
+    {
+      href: `/classes/${classId}/games/doi-khang-tranh-tai`,
+      emoji: "⚔️",
+      title: "Đối kháng tranh tài",
+      description: "5 kiểu thi đấu 2 đội theo đề kiểm tra của bạn.",
+    },
+    {
+      href: "/mini-game/hen-gio",
+      emoji: "🧰",
+      title: "Công cụ: Hẹn giờ lớp học",
+      description: "Mở công cụ hẹn giờ miễn phí, không cần chọn lớp.",
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Gọi tên ngẫu nhiên</h1>
-          <p className="mt-1 text-sm text-zinc-500">Lớp {classItem.name}</p>
+          <h1 className="font-display text-2xl font-extrabold text-(--color-cocoa)">
+            🎲 Mini-game
+          </h1>
+          <p className="mt-1 text-sm text-(--color-cocoa)/60">Lớp {classItem.name}</p>
         </div>
         <Link
           href={`/classes/${classId}`}
-          className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          className="rounded-full border-2 border-(--color-cocoa)/15 px-4 py-2 text-sm font-bold text-(--color-cocoa) hover:bg-white"
         >
           Quay lại lớp học
         </Link>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {RANDOM_PICKER_GAMES.map((game) => (
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {categories.map((c) => (
           <Link
-            key={game.slug}
-            href={`/classes/${classId}/games/${game.slug}`}
-            className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 transition hover:border-sky-400 hover:shadow-sm"
+            key={c.title}
+            href={c.href}
+            className="flex flex-col gap-2 rounded-3xl bg-white p-6 shadow-[0_8px_24px_-8px_rgba(62,40,27,0.12)] transition hover:-translate-y-1"
           >
-            <span className="text-3xl">{game.emoji}</span>
-            <span className="font-semibold text-zinc-900">{game.name}</span>
-            <span className="text-sm text-zinc-500">{game.description}</span>
+            <span className="text-3xl">{c.emoji}</span>
+            <span className="font-display font-bold text-(--color-cocoa)">{c.title}</span>
+            <span className="text-sm text-(--color-cocoa)/60">{c.description}</span>
           </Link>
         ))}
+
+        <div className="flex flex-col gap-2 rounded-3xl bg-(--color-cream) p-6 opacity-70">
+          <span className="text-3xl grayscale">📷</span>
+          <span className="font-display font-bold text-(--color-cocoa)/60">Camera</span>
+          <span className="text-sm text-(--color-cocoa)/50">
+            Trả lời bằng cử chỉ qua webcam — sắp ra mắt.
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -82,4 +82,20 @@ export function stripAnswerKey<T extends { type: QuestionType; data: unknown }>(
   return { ...question, data };
 }
 
+export function formatCorrectAnswer(question: { type: QuestionType; data: unknown }): string {
+  const data = question.data as Record<string, unknown>;
+  if (question.type === "MULTIPLE_CHOICE") {
+    const options = data.options as { id: string; text: string }[];
+    const correct = options.find((o) => o.id === data.correctOptionId);
+    return correct?.text ?? "—";
+  }
+  if (question.type === "TRUE_FALSE") {
+    return data.correctAnswer ? "Đúng" : "Sai";
+  }
+  if (question.type === "FILL_IN_BLANK") {
+    return (data.acceptedAnswers as string[]).join(" / ");
+  }
+  return "—";
+}
+
 export type { Question };

@@ -22,6 +22,7 @@ model User {
   sessions      Session[]
   classes       Class[]
   quizzes       Quiz[]
+  resources     Resource[]
   createdAt     DateTime  @default(now())
 }
 
@@ -141,11 +142,13 @@ model Assignment {
   showResultsToStudent     Boolean      @default(true)
   allowMultipleSubmissions Boolean      @default(false)
   isActive                 Boolean      @default(true)
+  isPublicSample           Boolean      @default(false)
   submissions              Submission[]
   createdAt                DateTime     @default(now())
 
   @@index([quizId])
   @@index([classId])
+  @@index([isPublicSample])
 }
 
 enum SubmissionStatus {
@@ -182,4 +185,24 @@ model Answer {
   pointsAwarded Float
 
   @@unique([submissionId, questionId])
+}
+
+// ---------- Digital resource library ----------
+
+model Resource {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  category      String?
+  fileUrl       String
+  fileName      String
+  fileType      String
+  fileSize      Int
+  downloadCount Int      @default(0)
+  uploadedById  String
+  uploadedBy    User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@index([uploadedById])
+  @@index([category])
 }

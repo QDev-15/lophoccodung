@@ -36,8 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
-# claude code local state
-.claude/
+# claude code local state (keep .claude/agents and other shared config tracked)
+.claude/*.lock
+.claude/settings.local.json
 
 # typescript
 *.tsbuildinfo

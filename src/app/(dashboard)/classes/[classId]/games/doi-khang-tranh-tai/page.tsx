@@ -45,9 +45,14 @@ export default async function BattleCategoryPage({
           <Link
             key={theme.slug}
             href={`/classes/${classId}/games/doi-khang-tranh-tai/${theme.slug}`}
-            className="flex flex-col gap-2 rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)] transition hover:-translate-y-1"
+            className="group flex flex-col gap-2 rounded-3xl bg-white p-5 shadow-[0_8px_24px_-8px_rgba(46,42,33,0.12)] transition hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(46,42,33,0.22)]"
           >
-            <IconChip icon={theme.emoji} tint={theme.tint} size="lg" />
+            <div className="flex items-center justify-between">
+              <IconChip icon={theme.emoji} tint={theme.tint} size="lg" className="transition group-hover:scale-110" />
+              <span className="rounded-full bg-(--color-cloud) px-2.5 py-1 text-[10px] font-extrabold text-(--color-ink)/50">
+                🧒 vs 👧
+              </span>
+            </div>
             <span className="font-display font-bold text-(--color-ink)">{theme.name}</span>
             <span className="text-sm text-(--color-ink)/60">{theme.description}</span>
           </Link>

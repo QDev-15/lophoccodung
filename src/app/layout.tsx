@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, Baloo_2 } from "next/font/google";
 import "./globals.css";
 
@@ -17,6 +17,10 @@ const baloo2 = Baloo_2({
 export const metadata: Metadata = {
   title: "Lớp Học Cô Dung",
   description: "Quản lý lớp học, tạo đề kiểm tra và chấm điểm tự động.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fefaf1",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

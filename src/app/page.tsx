@@ -130,12 +130,12 @@ export default async function Home() {
               </span>
             </div>
             <p className="mx-auto mt-2 max-w-xl text-center text-(--color-ink)/65">
-              10 kiểu gọi tên vui nhộn để chọn học sinh lên bảng, dựa trên danh sách lớp thật của
-              bạn.
+              {RANDOM_PICKER_GAMES.length} kiểu gọi tên vui nhộn để chọn học sinh lên bảng, dựa
+              trên danh sách lớp thật của bạn.
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-              {RANDOM_PICKER_GAMES.map((game, i) => (
+              {RANDOM_PICKER_GAMES.slice(0, 10).map((game, i) => (
                 <div
                   key={game.slug}
                   className="flex flex-col items-center gap-2 rounded-2xl bg-(--color-cloud) p-4 text-center transition hover:-translate-y-1"

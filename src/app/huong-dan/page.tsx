@@ -179,7 +179,7 @@ export default function GuidePage() {
                 [
                   "bg-(--color-mint-light) text-(--color-mint-dark)",
                   "bg-violet-100 text-(--color-lavender)",
-                  "bg-orange-50 text-(--color-peach)",
+                  "bg-emerald-50 text-(--color-peach)",
                 ][i % 3]
               }`}
             >

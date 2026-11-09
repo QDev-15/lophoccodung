@@ -22,19 +22,26 @@ export function QuestionReveal({
   if (question.type === "MULTIPLE_CHOICE") {
     const options = (data.options as { id: string; text: string }[]) ?? [];
     return (
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="mt-4 flex flex-col gap-2.5">
         {options.map((opt) => {
           const isCorrect = revealed && opt.id === data.correctOptionId;
           return (
             <div
               key={opt.id}
-              className={`rounded-xl border-2 px-4 py-2 text-sm font-medium ${
+              className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-base font-bold transition ${
                 isCorrect
-                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-ink)"
+                  ? "animate-pop-in border-(--color-mint) bg-(--color-mint-light) text-(--color-ink) shadow-[0_3px_10px_-4px_rgba(21,128,61,0.35)]"
                   : "border-(--color-ink)/10 text-(--color-ink)/80"
               }`}
             >
-              {opt.text} {isCorrect && "✓"}
+              <span
+                className={`flex size-8 shrink-0 items-center justify-center rounded-full text-base font-extrabold ${
+                  isCorrect ? "bg-(--color-mint) text-white" : "bg-(--color-ink)/10 text-(--color-ink)/40"
+                }`}
+              >
+                {isCorrect ? "✓" : ""}
+              </span>
+              {opt.text}
             </div>
           );
         })}
@@ -51,13 +58,13 @@ export function QuestionReveal({
           return (
             <div
               key={String(val)}
-              className={`flex-1 rounded-xl border-2 px-4 py-2 text-center text-sm font-bold ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 py-3.5 text-center text-base font-extrabold transition ${
                 isCorrect
-                  ? "border-(--color-mint) bg-(--color-mint-light) text-(--color-ink)"
+                  ? "animate-pop-in border-(--color-mint) bg-(--color-mint-light) text-(--color-ink) shadow-[0_3px_10px_-4px_rgba(21,128,61,0.35)]"
                   : "border-(--color-ink)/10 text-(--color-ink)/80"
               }`}
             >
-              {val ? "Đúng" : "Sai"} {isCorrect && "✓"}
+              {val ? "✅ Đúng" : "❌ Sai"} {isCorrect && <span className="text-(--color-mint-dark)">✓</span>}
             </div>
           );
         })}
@@ -68,11 +75,13 @@ export function QuestionReveal({
   return (
     <div className="mt-4">
       {revealed ? (
-        <p className="rounded-xl border-2 border-(--color-mint) bg-(--color-mint-light) px-4 py-2 text-sm font-bold text-(--color-ink)">
-          Đáp án: {formatCorrectAnswer({ type: question.type as QuestionType, data: question.data })}
+        <p className="animate-pop-in rounded-2xl border-2 border-(--color-mint) bg-(--color-mint-light) px-4 py-3.5 text-base font-bold text-(--color-ink) shadow-[0_3px_10px_-4px_rgba(21,128,61,0.35)]">
+          ✅ Đáp án: {formatCorrectAnswer({ type: question.type as QuestionType, data: question.data })}
         </p>
       ) : (
-        <p className="text-sm text-(--color-ink)/50">Câu điền từ — bấm &quot;Hiện đáp án&quot; để xem.</p>
+        <p className="rounded-2xl border-2 border-dashed border-(--color-ink)/15 px-4 py-3.5 text-base text-(--color-ink)/50">
+          ✏️ Câu điền từ — bấm &quot;Hiện đáp án&quot; để xem.
+        </p>
       )}
     </div>
   );

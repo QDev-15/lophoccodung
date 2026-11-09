@@ -44,6 +44,34 @@ export const BATTLE_THEMES: BattleTheme[] = [
     description: "So tài giành chiếc cúp vô địch của lớp.",
     tint: "lavender",
   },
+  {
+    slug: "vua-toc-do",
+    name: "Vua Tốc Độ",
+    emoji: "🏎️",
+    description: "Hai đội đua trả lời nhanh để giành ngôi vua tốc độ.",
+    tint: "peach",
+  },
+  {
+    slug: "dai-chien-tri-tue",
+    name: "Đại Chiến Trí Tuệ",
+    emoji: "🧠",
+    description: "Hai đội đối đầu trong cuộc đại chiến trí tuệ đầy gay cấn.",
+    tint: "mint",
+  },
+  {
+    slug: "dai-chien-leo-nui",
+    name: "Đại Chiến Leo Núi",
+    emoji: "⛰️",
+    description: "Hai đội thi leo núi bằng các phép cộng trong 100.",
+    tint: "lavender",
+  },
+  {
+    slug: "chinh-phuc-dinh-nui",
+    name: "Chinh Phục Đỉnh Núi",
+    emoji: "🏔️",
+    description: "Chinh phục đỉnh núi cao nhất bằng các phép cộng trong 100.",
+    tint: "peach",
+  },
 ];
 
 export function getBattleTheme(slug: string): BattleTheme | undefined {

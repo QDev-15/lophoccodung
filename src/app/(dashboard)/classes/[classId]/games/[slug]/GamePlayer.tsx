@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { GameMeta } from "@/lib/games";
+import { IconChip } from "@/components/IconChip";
 import { usePicker, type PickerStudent } from "../usePicker";
 
 import { WheelGame } from "./_games/WheelGame";
@@ -33,6 +34,19 @@ const GAME_COMPONENTS: Record<string, React.ComponentType<GameComponentProps>> =
   "xoc-dia": CupShuffleGame,
   "phi-tieu": DartGame,
   "vong-xoay-so": SlotReelGame,
+  "khu-tu-tri": SlotReelGame,
+  "ho-lo-bien-hinh": CupShuffleGame,
+  "nhay-bao-bo": StickDrawGame,
+  "di-ca-kheo": DartGame,
+  "ca-sau-len-bo": DoorGame,
+  "bit-mat-bat-de": BubbleGame,
+  "ban-can-tu-than": WheelGame,
+  stickman: CardDrawGame,
+  "cay-cau-sinh-ton": GiftBoxGame,
+  "trum-ba-khi": TreasureChestGame,
+  "dua-bi": SlotReelGame,
+  ufo: DoorGame,
+  "bap-rang-bo": BubbleGame,
 };
 
 export function GamePlayer({
@@ -51,63 +65,71 @@ export function GamePlayer({
   const GameComponent = GAME_COMPONENTS[game.slug];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
-            {game.emoji} {game.name}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">Lớp {className}</p>
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <IconChip icon={game.emoji} tint="mint" size="xl" />
+          <div>
+            <h1 className="font-display flex items-center gap-2 text-2xl font-extrabold text-(--color-ink)">
+              {game.name}
+              <span className="animate-wiggle text-3xl">🧒</span>
+            </h1>
+            <p className="mt-0.5 text-sm text-(--color-ink)/60">Lớp {className}</p>
+          </div>
         </div>
         <Link
           href={`/classes/${classId}/games`}
-          className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          className="rounded-full border-2 border-(--color-ink)/15 bg-white px-4 py-2 text-sm font-bold text-(--color-ink) transition hover:-translate-y-0.5 hover:bg-(--color-cloud)"
         >
           Chọn game khác
         </Link>
       </div>
 
       {total === 0 ? (
-        <p className="mt-8 text-sm text-zinc-500">
+        <p className="mt-8 rounded-2xl bg-white p-5 text-sm font-bold text-(--color-ink)/60 shadow-[0_4px_12px_-4px_rgba(46,42,33,0.15)]">
           Lớp này chưa có học sinh nào. Hãy thêm học sinh trước khi chơi.
         </p>
       ) : (
         <>
-          <div className="mt-6 flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm">
-            <span className="text-zinc-600">
-              Còn lại <span className="font-semibold text-zinc-900">{remaining.length}</span> /{" "}
-              {total} học sinh
+          <div className="mt-6 flex items-center justify-between rounded-full bg-white px-5 py-3 text-sm shadow-[0_4px_12px_-4px_rgba(46,42,33,0.15)]">
+            <span className="font-bold text-(--color-ink)/70">
+              Còn lại <span className="text-(--color-mint-dark)">{remaining.length}</span> / {total} học
+              sinh
             </span>
             <button
               onClick={reset}
-              className="font-medium text-sky-600 hover:text-sky-700"
+              className="font-bold text-(--color-lavender) transition hover:underline"
             >
               Làm mới toàn bộ
             </button>
           </div>
 
           {isExhausted && (
-            <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">
-              Đã gọi hết cả lớp! Bấm &quot;Làm mới toàn bộ&quot; để chơi lại.
+            <p className="animate-pop-in mt-4 rounded-2xl bg-(--color-sun)/20 px-4 py-3 text-sm font-bold text-(--color-sun-dark)">
+              🎉 Đã gọi hết cả lớp! Bấm &quot;Làm mới toàn bộ&quot; để chơi lại.
             </p>
           )}
 
-          <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6">
+          <div className="mt-6">
             {GameComponent ? (
               <GameComponent remaining={remaining} pick={pick} isExhausted={isExhausted} />
             ) : (
-              <p className="text-sm text-red-600">Không tìm thấy game này.</p>
+              <p className="rounded-2xl bg-white p-5 text-sm font-bold text-(--color-bloom) shadow-[0_4px_12px_-4px_rgba(46,42,33,0.15)]">
+                Không tìm thấy game này.
+              </p>
             )}
           </div>
 
           {history.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-sm font-semibold text-zinc-900">Đã gọi ({history.length})</h2>
-              <ol className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-6 rounded-2xl bg-white p-5 shadow-[0_4px_12px_-4px_rgba(46,42,33,0.15)]">
+              <h2 className="font-display text-sm font-extrabold text-(--color-ink)">
+                Đã gọi ({history.length})
+              </h2>
+              <ol className="mt-3 flex flex-wrap gap-2">
                 {history.map((s, i) => (
                   <li
                     key={`${s.id}-${i}`}
-                    className="rounded-full bg-zinc-100 px-3 py-1 text-xs text-zinc-700"
+                    className="rounded-full bg-(--color-cloud) px-3 py-1 text-xs font-bold text-(--color-ink)/70"
                   >
                     {history.length - i}. {s.fullName}
                   </li>

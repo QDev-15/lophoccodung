@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tổng quan", icon: "🏠", tint: "mint" },
   { href: "/classes", label: "Lớp học", icon: "🧑‍🤝‍🧑", tint: "lavender" },
+  { href: "/dashboard/mini-game", label: "Mini-game", icon: "🎲", tint: "peach" },
   { href: "/quizzes", label: "Đề kiểm tra", icon: "📝", tint: "peach" },
   { href: "/assignments", label: "Bài đã giao", icon: "📨", tint: "mint" },
   { href: "/resources", label: "Học liệu", icon: "📚", tint: "lavender" },
@@ -14,7 +15,7 @@ const NAV_ITEMS = [
 const TINT_CLASSES: Record<(typeof NAV_ITEMS)[number]["tint"], string> = {
   mint: "bg-(--color-mint-light) text-(--color-mint-dark)",
   lavender: "bg-violet-100 text-(--color-lavender)",
-  peach: "bg-orange-50 text-(--color-peach)",
+  peach: "bg-emerald-50 text-(--color-peach)",
 };
 
 export function DashboardNav({ layout }: { layout: "sidebar" | "mobile" }) {

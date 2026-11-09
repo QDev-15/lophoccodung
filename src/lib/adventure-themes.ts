@@ -1,5 +1,48 @@
 export type Tint = "mint" | "lavender" | "peach";
 
+export type TintStyle = {
+  text: string;
+  bg: string;
+  bgLight: string;
+  ring: string;
+  gradient: string;
+  shadowDark: string;
+  blob: string;
+};
+
+// Shared tint→style lookup reused by both the adventure and battle engines
+// (and by every per-theme scene component) so color treatment stays
+// consistent across the whole mini-game catalog.
+export const TINT_STYLES: Record<Tint, TintStyle> = {
+  mint: {
+    text: "text-(--color-mint-dark)",
+    bg: "bg-(--color-mint)",
+    bgLight: "bg-(--color-mint-light)",
+    ring: "ring-(--color-mint-dark)",
+    gradient: "from-(--color-mint) to-(--color-mint-dark)",
+    shadowDark: "var(--color-mint-dark)",
+    blob: "bg-(--color-mint-light)",
+  },
+  lavender: {
+    text: "text-(--color-lavender)",
+    bg: "bg-(--color-lavender)",
+    bgLight: "bg-violet-100",
+    ring: "ring-(--color-lavender)",
+    gradient: "from-(--color-lavender) to-[#5b21b6]",
+    shadowDark: "#5b21b6",
+    blob: "bg-violet-100",
+  },
+  peach: {
+    text: "text-(--color-peach)",
+    bg: "bg-(--color-peach)",
+    bgLight: "bg-emerald-50",
+    ring: "ring-(--color-peach)",
+    gradient: "from-(--color-peach) to-[#065f46]",
+    shadowDark: "#065f46",
+    blob: "bg-emerald-50",
+  },
+};
+
 export type AdventureTheme = {
   slug: string;
   name: string;
@@ -101,6 +144,76 @@ export const ADVENTURE_THEMES: AdventureTheme[] = [
     stepIcon: "🌼",
     finishIcon: "🌺",
     tint: "peach",
+  },
+  {
+    slug: "tay-cau-sieu-dang",
+    name: "Tay Câu Siêu Đẳng",
+    emoji: "🎣",
+    description: "Câu từng chú cá mang đáp án đúng để về đích.",
+    mascot: "🎣",
+    stepIcon: "🐟",
+    finishIcon: "🏆",
+    tint: "mint",
+  },
+  {
+    slug: "o-cua-tuoi-tho",
+    name: "Ô Cửa Tuổi Thơ",
+    emoji: "🚪",
+    description: "Mở từng ô cửa tuổi thơ để khám phá điều bất ngờ phía sau.",
+    mascot: "🧒",
+    stepIcon: "🚪",
+    finishIcon: "🎉",
+    tint: "lavender",
+  },
+  {
+    slug: "tiem-sinh-to",
+    name: "Tiệm Sinh Tố",
+    emoji: "🥤",
+    description: "Pha từng cốc sinh tố khi trả lời đúng để mở tiệm thành công.",
+    mascot: "🧑‍🍳",
+    stepIcon: "🍓",
+    finishIcon: "🥳",
+    tint: "peach",
+  },
+  {
+    slug: "anh-hung-vuot-ai",
+    name: "Anh Hùng Vượt Ải",
+    emoji: "🦸",
+    description: "Vượt qua từng cửa ải để trở thành anh hùng của lớp.",
+    mascot: "🦸",
+    stepIcon: "🛡️",
+    finishIcon: "👑",
+    tint: "mint",
+  },
+  {
+    slug: "du-hanh-thoi-gian",
+    name: "Du Hành Thời Gian",
+    emoji: "⏳",
+    description: "Du hành qua từng mốc thời gian bằng những câu trả lời chính xác.",
+    mascot: "🕰️",
+    stepIcon: "⌛",
+    finishIcon: "🌌",
+    tint: "lavender",
+  },
+  {
+    slug: "chuyen-xe-yeu-thuong",
+    name: "Chuyến Xe Yêu Thương",
+    emoji: "🚌",
+    description: "Lên chuyến xe yêu thương, mỗi câu đúng đi thêm một chặng đường.",
+    mascot: "🚌",
+    stepIcon: "🛣️",
+    finishIcon: "💝",
+    tint: "peach",
+  },
+  {
+    slug: "sieu-thi-rau-cu",
+    name: "Siêu Thị Rau Củ 4.0",
+    emoji: "🥦",
+    description: "Thu thập từng giỏ rau củ thông minh khi trả lời đúng.",
+    mascot: "🤖",
+    stepIcon: "🛒",
+    finishIcon: "🏪",
+    tint: "mint",
   },
 ];
 

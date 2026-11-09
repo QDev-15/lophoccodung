@@ -10,7 +10,7 @@ const NAV_LINKS = [
 const TINT_CLASSES: Record<(typeof NAV_LINKS)[number]["tint"], string> = {
   mint: "bg-(--color-mint-light) text-(--color-mint-dark)",
   lavender: "bg-violet-100 text-(--color-lavender)",
-  peach: "bg-orange-50 text-(--color-peach)",
+  peach: "bg-emerald-50 text-(--color-peach)",
 };
 
 export function PublicHeader() {

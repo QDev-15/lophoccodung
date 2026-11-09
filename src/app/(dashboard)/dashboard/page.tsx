@@ -10,6 +10,13 @@ const SHORTCUTS = [
     desc: "Tạo lớp, cập nhật thông tin và danh sách học sinh.",
   },
   {
+    href: "/dashboard/mini-game",
+    icon: "🎲",
+    tint: "bg-emerald-50 text-(--color-peach)",
+    title: "Mini-game",
+    desc: "Gọi tên, phiêu lưu tri thức, đối kháng tranh tài cho lớp của bạn.",
+  },
+  {
     href: "/quizzes",
     icon: "📝",
     tint: "bg-violet-100 text-(--color-lavender)",
@@ -19,7 +26,7 @@ const SHORTCUTS = [
   {
     href: "/assignments",
     icon: "📨",
-    tint: "bg-orange-50 text-(--color-peach)",
+    tint: "bg-emerald-50 text-(--color-peach)",
     title: "Bài đã giao",
     desc: "Giao bài qua liên kết và xem kết quả học sinh.",
   },
